@@ -4,35 +4,69 @@ import { AuthRequest } from '../../../middlewares/authMiddleware';
 import { ITaskService, IGetTasksQueryDTO } from '../../../services/userService/taskService/IUserTaskService';
 import { ITaskController } from './IUserTaskController';
 import { TaskStatus, TaskPriority } from '../../../models/taskModel';
+import { IFileService } from '../../../services/userService/FileService/IFileService';
+import { IFile } from '../../../models/fileModel';
 
 export class TaskController implements ITaskController {
-  constructor(private taskService: ITaskService) {}
+  private taskService: ITaskService
+  private fileService:IFileService
+  constructor(taskService: ITaskService,fileService:IFileService) {
+    this.taskService = taskService,
+    this.fileService = fileService
+  }
 
   createTask = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message: 'Unauthorized',
-        });
-        return;
-      }
-
-      const task = await this.taskService.createTask(req.body, req.user.userId);
-
-      res.status(201).json({
-        success: true,
-        message: 'Task created successfully',
-        data: task,
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
       });
-    } catch (error) {
-      next(error);
+      return;
     }
-  };
+
+    // Create the task
+    const task = await this.taskService.createTask(req.body, req.user.userId);
+
+    // Handle file uploads if any
+    const uploadedFiles: IFile[] = []; // Explicitly define the type
+    if (req.files && Array.isArray(req.files)) {
+      const uploadPromises = req.files.map(async (file: Express.Multer.File) => {
+        try {
+          const uploadedFile = await this.fileService.uploadFile({
+            file,
+            taskId: task._id.toString(),
+            userId: req.user!.userId,
+          });
+          return uploadedFile;
+        } catch (error) {
+          console.error('File upload failed:', error);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(uploadPromises);
+      // Filter out null values and cast to IFile[]
+      const successfulFiles = results.filter((file): file is IFile => file !== null);
+      uploadedFiles.push(...successfulFiles);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Task created successfully' + (uploadedFiles.length > 0 ? ` with ${uploadedFiles.length} files` : ''),
+      data: {
+        task,
+        files: uploadedFiles,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
   getTasks = async (
     req: AuthRequest,
@@ -83,7 +117,6 @@ export class TaskController implements ITaskController {
   ): Promise<void> => {
     try {
 
-      console.log(req.user)
       if (!req.user) {
         res.status(401).json({
           success: false,
@@ -93,7 +126,7 @@ export class TaskController implements ITaskController {
       }
 
       // Handle req.params.id which can be string | string[]
-      const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const taskId = Array.isArray(req.params.taskId) ? req.params.taskId[0] : req.params.taskId
 
       const task = await this.taskService.getTaskById(
         taskId,
@@ -125,7 +158,7 @@ export class TaskController implements ITaskController {
       }
 
       // Handle req.params.id which can be string | string[]
-      const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const taskId = Array.isArray(req.params.taskId) ? req.params.taskId[0] : req.params.taskId;
 
       const task = await this.taskService.updateTask(
         taskId,
@@ -158,7 +191,7 @@ export class TaskController implements ITaskController {
       }
 
       // Handle req.params.id which can be string | string[]
-      const taskId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const taskId = Array.isArray(req.params.taskId) ? req.params.taskId[0] : req.params.taskId;
 
       await this.taskService.deleteTask(taskId, req.user.userId);
 

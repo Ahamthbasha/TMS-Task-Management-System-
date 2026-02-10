@@ -1,5 +1,5 @@
 // types/interface/taskInterface.ts
-
+import {type IFile } from './fileInterface';
 // Replace enums with const objects for better TypeScript compatibility
 export const TaskStatus = {
   TODO: 'todo',
@@ -39,6 +39,7 @@ export interface ITask {
   deletedAt?: Date | string;
   createdAt: Date | string;
   updatedAt: Date | string;
+  files?: IFile[];
 }
 
 export interface IPaginatedTasks {
@@ -92,4 +93,5 @@ export interface TaskApiResponse<T = ITask | IPaginatedTasks | ITask[] | null> {
   success: boolean;
   message: string;
   data: T;
+  files?:IFile[]
 }

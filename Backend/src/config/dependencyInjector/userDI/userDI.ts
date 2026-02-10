@@ -30,6 +30,12 @@ import { CommentService } from "../../../services/userService/commentService/com
 import { ICommentController } from "../../../controllers/userController/commentController/ICommentController";
 import { CommentController } from "../../../controllers/userController/commentController/commentController";
 
+import { IFileRepository } from "../../../repositories/userRepo/fileRepo/IFileRepo";
+import { FileRepository } from "../../../repositories/userRepo/fileRepo/fileRepo";
+import { IFileService } from "../../../services/userService/FileService/IFileService";
+import { FileService } from "../../../services/userService/FileService/fileService";
+import { IFileController } from "../../../controllers/userController/fileController/IFileController";
+import { FileController } from "../../../controllers/userController/fileController/fileController";
 
 const hashService : IHashingService = new HashingService()
 const jwtService : IJwtService = new JwtService()
@@ -45,7 +51,7 @@ const authMiddleware : IAuthMiddleware = new AuthMiddleware(jwtService,userRepo)
 const userTaskRepo : ITaskRepository =  new TaskRepository()
 const userTaskService : ITaskService = new TaskService(userTaskRepo,userRepo)
 
-const userTaskController : ITaskController = new TaskController(userTaskService)
+
 
 // comment
 
@@ -53,13 +59,24 @@ const userCommentRepo : ICommentRepository = new CommentRepository()
 
 const userCommentService : ICommentService = new CommentService(userCommentRepo,userTaskRepo,userRepo)
 
-const userCommentController : ICommentController = new CommentController(userCommentService)
 
+
+// file controller
+
+const userFileRepo : IFileRepository = new FileRepository()
+const userFileService : IFileService = new FileService(userFileRepo,userTaskRepo,userCommentRepo)
+const userFileController : IFileController = new FileController(userFileService)
+
+
+const userTaskController : ITaskController = new TaskController(userTaskService,userFileService)
+
+const userCommentController : ICommentController = new CommentController(userCommentService,userFileService)
 
 
 export {
     userController,
     authMiddleware,
     userTaskController,
-    userCommentController
+    userCommentController,
+    userFileController
 }

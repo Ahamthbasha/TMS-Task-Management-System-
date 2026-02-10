@@ -1,4 +1,4 @@
-// src/services/fileService/IFileService.ts
+// src/services/fileService/IFileService.ts - Updated
 import { IFile } from '../../../models/fileModel';
 
 export interface IUploadFileDTO {
@@ -6,6 +6,7 @@ export interface IUploadFileDTO {
   taskId?: string;
   commentId?: string;
   userId: string;
+  multerFilename?: string;
 }
 
 export interface IFileService {
@@ -15,4 +16,5 @@ export interface IFileService {
   getCommentFiles(commentId: string, userId: string): Promise<IFile[]>;
   deleteFile(fileId: string, userId: string): Promise<void>;
   getAllTaskFiles(taskId: string, userId: string): Promise<IFile[]>;
+  getFileForDownload(fileId: string, userId: string): Promise<{ file: IFile, filePath: string }>; // NEW METHOD
 }

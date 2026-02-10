@@ -25,7 +25,7 @@ export const uploadFileValidation = [
 ];
 
 export const fileIdValidation = [
-  param('id')
+  param('fileId')
     .isMongoId()
     .withMessage('Invalid file ID'),
 ];

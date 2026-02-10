@@ -3,9 +3,16 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../../middlewares/authMiddleware';
 import { ICommentService } from '../../../services/userService/commentService/ICommentService'; 
 import { ICommentController } from './ICommentController';
+import { IFile } from '../../../models/fileModel';
+import { IFileService } from '../../../services/userService/FileService/IFileService';
 
 export class CommentController implements ICommentController {
-  constructor(private commentService: ICommentService) {}
+  private commentService: ICommentService
+  private fileService : IFileService
+  constructor(commentService:ICommentService,fileService:IFileService) {
+    this.commentService = commentService
+    this.fileService = fileService
+  }
 
   // Helper method to ensure param is string
   private getStringParam(param: string | string[] | undefined): string {
@@ -38,6 +45,66 @@ export class CommentController implements ICommentController {
         success: true,
         message: 'Comment created successfully',
         data: comment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  createCommentWithFiles = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'Unauthorized',
+        });
+        return;
+      }
+
+      // 1. Create the comment first
+      const comment = await this.commentService.createComment(
+        req.body,
+        req.user.userId
+      );
+
+      // 2. Upload files if any
+      const uploadedFiles: IFile[] = [];
+      if (req.files && Array.isArray(req.files)) {
+        const uploadPromises: Promise<IFile | null>[] = req.files.map(
+          async (file: Express.Multer.File) => {
+            try {
+              return await this.fileService.uploadFile({
+                file,
+                commentId: comment._id.toString(),
+                userId: req.user!.userId,
+              });
+            } catch (error) {
+              console.error('File upload failed:', error);
+              return null;
+            }
+          }
+        );
+
+        const uploadResults = await Promise.all(uploadPromises);
+        uploadResults.forEach(result => {
+          if (result !== null) {
+            uploadedFiles.push(result);
+          }
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        message: 'Comment created successfully' + 
+                 (uploadedFiles.length > 0 ? ` with ${uploadedFiles.length} files` : ''),
+        data: {
+          comment,
+          files: uploadedFiles,
+        },
       });
     } catch (error) {
       next(error);

@@ -1,4 +1,4 @@
-// src/models/fileModel.ts
+// src/models/fileModel.ts - Updated
 import mongoose, { Schema, Document } from 'mongoose';
 
 export enum FileType {
@@ -12,14 +12,14 @@ export enum FileType {
 }
 
 export interface IFile extends Document {
-  filename: string;
-  originalName: string;
-  fileUrl: string;
+  filename: string; // Actual stored filename (unique name)
+  originalName: string; // Original filename from user
+  fileUrl: string; // URL/path to access the file
+  storagePath: string; // Physical path on server
   fileType: FileType;
   mimeType: string;
   size: number;
 
-  // Polymorphic references — at most one should be set
   task?: mongoose.Types.ObjectId;
   comment?: mongoose.Types.ObjectId;
 
@@ -33,42 +33,20 @@ export interface IFile extends Document {
 
 const fileSchema = new Schema<IFile>(
   {
-    filename: {
-      type: String,
-      required: true,
-    },
-    originalName: {
-      type: String,
-      required: true,
-    },
-    fileUrl: {
-      type: String,
-      required: true,
-    },
+    filename: { type: String, required: true },
+    originalName: { type: String, required: true },
+    fileUrl: { type: String, required: true },
+    storagePath: { type: String, required: true }, // NEW FIELD
     fileType: {
       type: String,
-      enum: Object.values(FileType),
+      enum: FileType,
       required: true,
     },
-    mimeType: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
+    mimeType: { type: String, required: true },
+    size: { type: Number, required: true, min: 1 },
 
-    task: {
-      type: Schema.Types.ObjectId,
-      ref: 'Task',
-    },
-
-    comment: {
-      type: Schema.Types.ObjectId,
-      ref: 'Comment',
-    },
+    task: { type: Schema.Types.ObjectId, ref: 'Task' },
+    comment: { type: Schema.Types.ObjectId, ref: 'Comment' },
 
     uploadedBy: {
       type: Schema.Types.ObjectId,
@@ -76,40 +54,26 @@ const fileSchema = new Schema<IFile>(
       required: true,
     },
 
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
-    deletedAt: {
-      type: Date,
-    },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Mutual exclusivity check (task XOR comment)
-fileSchema.pre('validate', function (next) {
-  // Use type assertion so TypeScript knows this is a Document with invalidate()
-  const doc = this as IFile & { invalidate: (path: string, message: string) => void };
+// Enforce task XOR comment (modern async style)
+fileSchema.pre('validate', async function () {
+  const hasTask = !!this.task;
+  const hasComment = !!this.comment;
 
-  const hasTask    = !!doc.task;
-  const hasComment = !!doc.comment;
-
-  if (hasTask === hasComment) { // both missing OR both present
+  if (hasTask === hasComment) {
     if (!hasTask) {
-      doc.invalidate('task', 'Either task or comment reference is required');
-    } else {
-      doc.invalidate('task', 'Cannot reference both task and comment at the same time');
-      // You can also invalidate('comment', '...') if you prefer
+      throw new Error('Either task or comment reference is required');
     }
+    throw new Error('Cannot reference both task and comment at the same time');
   }
-
-  next();
 });
 
-// Indexes for better query performance
+// Indexes
 fileSchema.index({ task: 1, isDeleted: 1 });
 fileSchema.index({ comment: 1, isDeleted: 1 });
 fileSchema.index({ uploadedBy: 1, isDeleted: 1 });

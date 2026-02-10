@@ -9,4 +9,5 @@ export interface IFileController {
   getCommentFiles(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;
   getAllTaskFiles(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;
   deleteFile(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;
+  downloadFile(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
 }

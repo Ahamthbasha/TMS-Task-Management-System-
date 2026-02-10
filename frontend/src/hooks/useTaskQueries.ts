@@ -52,14 +52,40 @@ export const useGetTaskById = (taskId: string, enabled: boolean = true) => {
 /**
  * Hook to create a new task
  */
+// export const useCreateTask = () => {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: (data: ICreateTaskDTO) => createTask(data),
+//     onSuccess: (response) => {
+//       queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+//       toast.success(response.message || 'Task created successfully');
+//     },
+//     onError: (error: AxiosErrorResponse) => {
+//       const errorMessage =
+//         error?.response?.data?.message ||
+//         error?.message ||
+//         'Failed to create task';
+//       toast.error(errorMessage);
+//     },
+//   });
+// };
+
+
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ICreateTaskDTO) => createTask(data),
+    mutationFn: ({ data, files }: { data: ICreateTaskDTO; files?: File[] }) => 
+      createTask(data, files),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
-      toast.success(response.message || 'Task created successfully');
+      const message = response.message || 'Task created successfully';
+      if (response.files && response.files.length > 0) {
+        toast.success(`${message} with ${response.files.length} files`);
+      } else {
+        toast.success(message);
+      }
     },
     onError: (error: AxiosErrorResponse) => {
       const errorMessage =
@@ -70,6 +96,7 @@ export const useCreateTask = () => {
     },
   });
 };
+
 
 /**
  * Hook to update an existing task

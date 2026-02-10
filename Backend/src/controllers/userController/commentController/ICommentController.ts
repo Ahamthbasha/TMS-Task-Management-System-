@@ -3,7 +3,7 @@ import { AuthRequest } from '../../../middlewares/authMiddleware';
 
 export interface ICommentController {
   createComment(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;
-  
+  createCommentWithFiles(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
   getCommentsByTaskId(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;
   
   getCommentById(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;

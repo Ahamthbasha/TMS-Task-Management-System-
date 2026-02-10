@@ -9,6 +9,11 @@ export interface AuthRequest extends Request {
     email: string;
     role: string;
   };
+   multerFilenames?: Array<{
+    originalName: string;
+    filename: string;
+    timestamp: number;
+  }>;
 }
 
 export interface IAuthMiddleware {
@@ -26,8 +31,6 @@ export class AuthMiddleware implements IAuthMiddleware {
     try {
       // Read access token from cookie instead of Authorization header
       const accessToken = req.cookies?.accessToken;
-
-      console.log(accessToken)
 
       if (!accessToken) {
         throw new AppError('No token provided', 401);

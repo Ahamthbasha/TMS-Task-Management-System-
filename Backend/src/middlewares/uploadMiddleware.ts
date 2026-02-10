@@ -1,27 +1,71 @@
-// src/middlewares/uploadMiddleware.ts
+// src/middlewares/uploadMiddleware.ts - Updated with type assertion
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { Request } from 'express';
+
+// Define the type for multerFilenames
+interface MulterFileInfo {
+  originalName: string;
+  filename: string;
+  timestamp: number;
+}
+
+// Extend the Request interface locally
+declare global {
+  namespace Express {
+    interface Request {
+      multerFilenames?: MulterFileInfo[];
+    }
+  }
+}
 
 // Ensure uploads directory exists
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`Created uploads directory: ${uploadDir}`);
 }
 
-// Configure storage
+// Configure storage - Store with original filename
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (req: Request, file, cb) => {
+    console.log('Multer saving file to:', uploadDir);
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+  filename: (req: Request, file, cb) => {
+    // Store with timestamp + original name to avoid conflicts
+    const timestamp = Date.now();
+    
+    // Clean filename: replace spaces with underscores
+    const safeOriginalName = file.originalname
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .replace(/[^\w.-]/gi, ''); // Remove special characters
+    
+    const uniqueFilename = `${timestamp}-${safeOriginalName}`;
+    
+    console.log('Multer filename:', {
+      original: file.originalname,
+      safe: safeOriginalName,
+      unique: uniqueFilename
+    });
+    
+    // Store the filename in the request for later use
+    if (!req.multerFilenames) {
+      req.multerFilenames = [];
+    }
+    req.multerFilenames.push({
+      originalName: file.originalname,
+      filename: uniqueFilename,
+      timestamp: timestamp
+    });
+    
+    cb(null, uniqueFilename);
   },
 });
 
 // File filter
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = [
     'image/jpeg',
     'image/png',

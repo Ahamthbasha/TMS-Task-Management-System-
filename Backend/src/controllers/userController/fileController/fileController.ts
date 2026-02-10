@@ -1,60 +1,118 @@
-// src/controllers/fileController/fileController.ts
+// src/controllers/fileController/fileController.ts - Updated
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../../middlewares/authMiddleware';
-import { IFileService } from '../../../services/userService/FileService/IFileService'; 
+import { IFileService } from '../../../services/userService/FileService/IFileService';
 import { IFileController } from './IFileController';
+import fs from 'fs';
+import path from 'path';
 
 export class FileController implements IFileController {
   constructor(private fileService: IFileService) {}
 
-  uploadFile = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message: 'Unauthorized',
-        });
-        return;
-      }
+  // uploadFile = async (
+  //   req: AuthRequest,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> => {
+  //   try {
+  //     if (!req.user) {
+  //       res.status(401).json({
+  //         success: false,
+  //         message: 'Unauthorized',
+  //       });
+  //       return;
+  //     }
 
-      if (!req.file) {
-        res.status(400).json({
-          success: false,
-          message: 'No file uploaded',
-        });
-        return;
-      }
+  //     if (!req.file) {
+  //       res.status(400).json({
+  //         success: false,
+  //         message: 'No file uploaded',
+  //       });
+  //       return;
+  //     }
 
-      const { taskId, commentId } = req.body;
+  //     const { taskId, commentId } = req.body;
       
-      if (!taskId && !commentId) {
-        res.status(400).json({
-          success: false,
-          message: 'Either taskId or commentId must be provided',
-        });
-        return;
-      }
+  //     if (!taskId && !commentId) {
+  //       res.status(400).json({
+  //         success: false,
+  //         message: 'Either taskId or commentId must be provided',
+  //       });
+  //       return;
+  //     }
 
-      const file = await this.fileService.uploadFile({
-        file: req.file,
-        taskId,
-        commentId,
-        userId: req.user.userId,
-      });
+  //     const file = await this.fileService.uploadFile({
+  //       file: req.file,
+  //       taskId,
+  //       commentId,
+  //       userId: req.user.userId,
+  //     });
 
-      res.status(201).json({
-        success: true,
-        message: 'File uploaded successfully',
-        data: file,
+  //     res.status(201).json({
+  //       success: true,
+  //       message: 'File uploaded successfully',
+  //       data: file,
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
+
+  uploadFile = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
       });
-    } catch (error) {
-      next(error);
+      return;
     }
-  };
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'No file uploaded',
+      });
+      return;
+    }
+
+    const { taskId, commentId } = req.body;
+    
+    if (!taskId && !commentId) {
+      res.status(400).json({
+        success: false,
+        message: 'Either taskId or commentId must be provided',
+      });
+      return;
+    }
+
+    // Get the actual filename saved by multer
+    const multerFilename = req.multerFilenames?.[0]?.filename || req.file.filename;
+    
+    console.log('Controller: Multer saved file as:', multerFilename);
+    console.log('Controller: req.file.filename:', req.file.filename);
+
+    const file = await this.fileService.uploadFile({
+      file: req.file,
+      taskId,
+      commentId,
+      userId: req.user.userId,
+      multerFilename: multerFilename // Pass the actual filename
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'File uploaded successfully',
+      data: file,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
   getFile = async (
     req: AuthRequest,
@@ -70,20 +128,18 @@ export class FileController implements IFileController {
         return;
       }
 
-      const fileId = Array.isArray(req.params.id) 
-        ? req.params.id[0] 
-        : req.params.id;
+      const fileId = Array.isArray(req.params.fileId) 
+        ? req.params.fileId[0] 
+        : req.params.fileId;
 
       const file = await this.fileService.getFile(fileId, req.user.userId);
 
-      // For download, you can redirect to the actual file URL or serve it
-      // This depends on your storage setup
       res.status(200).json({
         success: true,
         message: 'File retrieved successfully',
         data: {
           ...file.toObject(),
-          downloadUrl: `/api/files/${fileId}/download`, // Separate endpoint for actual file download
+          downloadUrl: `/api/files/${fileId}/download`,
         },
       });
     } catch (error) {
@@ -195,9 +251,9 @@ export class FileController implements IFileController {
         return;
       }
 
-      const fileId = Array.isArray(req.params.id) 
-        ? req.params.id[0] 
-        : req.params.id;
+      const fileId = Array.isArray(req.params.fileId) 
+        ? req.params.fileId[0] 
+        : req.params.fileId;
 
       await this.fileService.deleteFile(fileId, req.user.userId);
 
@@ -206,6 +262,7 @@ export class FileController implements IFileController {
         message: 'File deleted successfully',
       });
     } catch (error) {
+      console.log("deleting file error", error);
       next(error);
     }
   };
@@ -224,15 +281,29 @@ export class FileController implements IFileController {
         return;
       }
 
-      const fileId = Array.isArray(req.params.id) 
-        ? req.params.id[0] 
-        : req.params.id;
+      const fileId = Array.isArray(req.params.fileId) 
+        ? req.params.fileId[0] 
+        : req.params.fileId;
 
-      const file = await this.fileService.getFile(fileId, req.user.userId);
+      const { file, filePath } = await this.fileService.getFileForDownload(fileId, req.user.userId);
 
-      // In production, this would redirect to cloud storage signed URL
-      // For local development, serve the file directly
-      res.download(file.fileUrl, file.originalName);
+      // Set appropriate headers
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file.originalName)}"`);
+      res.setHeader('Content-Length', file.size.toString());
+
+      // Stream the file
+      const fileStream = fs.createReadStream(filePath);
+      
+      fileStream.on('error', (error) => {
+        console.error('File stream error:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Error streaming file',
+        });
+      });
+
+      fileStream.pipe(res);
     } catch (error) {
       next(error);
     }
