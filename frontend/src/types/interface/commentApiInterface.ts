@@ -1,8 +1,7 @@
 // types/interface/commentApiInterface.ts
+import {type IComment, type IPaginatedComments, type ICommentWithFiles } from './commentInterface';
 
-import {type IComment, type IPaginatedComments } from './commentInterface';
-
-export interface CommentApiResponse<T = IComment | IPaginatedComments | null> {
+export interface CommentApiResponse<T = IComment | IPaginatedComments | ICommentWithFiles | null> {
   success: boolean;
   message: string;
   data: T;
@@ -18,4 +17,11 @@ export interface SingleCommentResponse {
   success: boolean;
   message: string;
   data: IComment;
+}
+
+// NEW: Response type for comment with files
+export interface CommentWithFilesResponse {
+  success: boolean;
+  message: string;
+  data: ICommentWithFiles;
 }

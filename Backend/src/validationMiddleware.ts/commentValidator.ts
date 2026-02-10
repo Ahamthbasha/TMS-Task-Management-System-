@@ -24,7 +24,7 @@ export const createCommentValidation = [
 ];
 
 export const updateCommentValidation = [
-  param('id')
+  param('commentId')
     .trim()
     .notEmpty()
     .withMessage('Comment ID is required')
@@ -40,7 +40,7 @@ export const updateCommentValidation = [
 ];
 
 export const deleteCommentValidation = [
-  param('id')
+  param('commentId')
     .trim()
     .notEmpty()
     .withMessage('Comment ID is required')

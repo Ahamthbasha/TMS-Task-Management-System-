@@ -161,7 +161,7 @@ export class CommentController implements ICommentController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const commentId = this.getStringParam(req.params.id);
+      const commentId = this.getStringParam(req.params.commentId);
 
       if (!commentId) {
         res.status(400).json({
@@ -197,11 +197,8 @@ export class CommentController implements ICommentController {
         return;
       }
 
-      const commentId = this.getStringParam(req.params.id);
+      const commentId = this.getStringParam(req.params.commentId);
 
-    console.log("comment id", commentId);
-    console.log("user id", req.user.userId); // ADD THIS
-    console.log("user object", req.user);     // AND THIS
       if (!commentId) {
         res.status(400).json({
           success: false,
@@ -240,7 +237,11 @@ export class CommentController implements ICommentController {
         return;
       }
 
-      const commentId = this.getStringParam(req.params.id);
+
+
+      const commentId = this.getStringParam(req.params.commentId);
+
+
 
       if (!commentId) {
         res.status(400).json({

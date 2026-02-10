@@ -28,14 +28,9 @@ import type {
   IUploadFileResponse,
 } from "../../types/interface/fileInterface";
 
-// export const createTask = async (
-//   data: ICreateTaskDTO,
-// ): Promise<TaskApiResponse<ITask>> => {
-//   const response = await API.post(userRouterEndPoints.userCreateTask, data);
-//   return response.data;
-// };
 
 // Helper to create FormData for task creation with files
+
 const createTaskFormData = (data: ICreateTaskDTO, files?: File[]): FormData => {
   const formData = new FormData();
   
@@ -124,32 +119,32 @@ export const bulkCreateTasks = async (
   return response.data;
 };
 
-export const createCommentWithFiles = async (
-  data: ICreateCommentDTO,
-  files?: File[]
-): Promise<CommentApiResponse<IComment & { files?: IFile[] }>> => {
-  const formData = new FormData();
-  formData.append('content', data.content);
-  formData.append('taskId', data.taskId);
+// export const createCommentWithFiles = async (
+//   data: ICreateCommentDTO,
+//   files?: File[]
+// ): Promise<CommentApiResponse<IComment & { files?: IFile[] }>> => {
+//   const formData = new FormData();
+//   formData.append('content', data.content);
+//   formData.append('taskId', data.taskId);
   
-  // Append files if any
-  if (files && files.length > 0) {
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-  }
+//   // Append files if any
+//   if (files && files.length > 0) {
+//     files.forEach((file) => {
+//       formData.append('files', file);
+//     });
+//   }
   
-  const response = await API.post(
-    userRouterEndPoints.userCreateCommentWithFiles,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-  return response.data;
-};
+//   const response = await API.post(
+//     userRouterEndPoints.userCreateCommentWithFiles,
+//     formData,
+//     {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//       },
+//     }
+//   );
+//   return response.data;
+// };
 
 export const createComment = async (
   data: ICreateCommentDTO,
@@ -437,4 +432,41 @@ export const uploadMultipleFiles = async (
 ): Promise<IUploadFileResponse[]> => {
   const uploadPromises = files.map((file) => uploadFile(file));
   return Promise.all(uploadPromises);
+};
+
+
+// api/userAction/userAction.ts (CORRECTED)
+export const createCommentWithFiles = async (
+  data: ICreateCommentDTO,
+  files: File[]
+): Promise<CommentApiResponse<IComment & { files?: IFile[] }>> => {
+  const formData = new FormData();
+  formData.append('content', data.content);
+  formData.append('taskId', data.taskId);
+  
+  // Append files if any
+  if (files && files.length > 0) {
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+  }
+  
+  console.log('Sending comment with files:', {
+    content: data.content,
+    taskId: data.taskId,
+    fileCount: files.length
+  });
+  
+  const response = await API.post(
+    userRouterEndPoints.userCreateCommentWithFiles,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  
+  console.log('Response:', response.data);
+  return response.data;
 };

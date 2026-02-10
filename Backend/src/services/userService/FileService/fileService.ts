@@ -25,86 +25,7 @@ export class FileService implements IFileService {
     return FileType.OTHER;
   }
 
-  // async uploadFile(data: IUploadFileDTO): Promise<IFile> {
-  //   const { file, taskId, commentId, userId } = data;
-
-  //   // Validate file size (max 10MB)
-  //   const MAX_SIZE = 10 * 1024 * 1024; // 10MB
-  //   if (file.size > MAX_SIZE) {
-  //     throw new AppError('File size exceeds 10MB limit', 400);
-  //   }
-
-  //   // Validate either taskId or commentId is provided
-  //   if (!taskId && !commentId) {
-  //     throw new AppError('Either taskId or commentId must be provided', 400);
-  //   }
-
-  //   // If taskId is provided, verify task exists and user has access
-  //   if (taskId) {
-  //     const task = await this.taskRepository.findByIdWithPopulate(taskId);
-  //     if (!task || task.isDeleted) {
-  //       throw new AppError('Task not found', 404);
-  //     }
-      
-  //     // Check if user has access to task
-  //     const hasAccess = 
-  //       task.createdBy._id.toString() === userId ||
-  //       (task.assignedTo && task.assignedTo._id.toString() === userId);
-      
-  //     if (!hasAccess) {
-  //       throw new AppError('You do not have access to this task', 403);
-  //     }
-  //   }
-
-  //   // If commentId is provided, verify comment exists and user has access
-  //   if (commentId) {
-  //     const comment = await this.commentRepository.findById(commentId);
-  //     if (!comment || comment.isDeleted) {
-  //       throw new AppError('Comment not found', 404);
-  //     }
-      
-  //     // Get task to check access
-  //     const task = await this.taskRepository.findByIdWithPopulate(comment.taskId.toString());
-  //     if (!task) {
-  //       throw new AppError('Associated task not found', 404);
-  //     }
-      
-  //     // Check if user has access to task
-  //     const hasAccess = 
-  //       task.createdBy._id.toString() === userId ||
-  //       (task.assignedTo && task.assignedTo._id.toString() === userId);
-      
-  //     if (!hasAccess) {
-  //       throw new AppError('You do not have access to this task', 403);
-  //     }
-  //   }
-
-  //   // Generate unique filename using original name
-  //   const timestamp = Date.now();
-  //   const uniqueFilename = `${timestamp}-${file.originalname}`;
-    
-  //   // Set file URL and storage path
-  //   const fileUrl = `/api/files/${timestamp}/download/${encodeURIComponent(file.originalname)}`;
-  //   const storagePath = path.join('uploads', uniqueFilename);
-
-  //   const fileData: Partial<IFile> = {
-  //     filename: uniqueFilename, // Stored filename
-  //     originalName: file.originalname, // Original filename
-  //     fileUrl, // Download URL
-  //     storagePath, // Physical storage path
-  //     fileType: this.getFileType(file.mimetype),
-  //     mimeType: file.mimetype,
-  //     size: file.size,
-  //     uploadedBy: new Types.ObjectId(userId),
-  //     task: taskId ? new Types.ObjectId(taskId) : undefined,
-  //     comment: commentId ? new Types.ObjectId(commentId) : undefined,
-  //   };
-
-  //   return this.fileRepository.create(fileData);
-  // }
-
-  // src/services/userService/FileService/fileService.ts - Updated uploadFile method
-async uploadFile(data: IUploadFileDTO): Promise<IFile> {
+  async uploadFile(data: IUploadFileDTO): Promise<IFile> {
   const { file, taskId, commentId, userId, multerFilename } = data;
 
   // Validate file size (max 10MB)
@@ -411,20 +332,6 @@ async uploadFile(data: IUploadFileDTO): Promise<IFile> {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
-
-  // NEW METHOD: Get file for download
-  // async getFileForDownload(fileId: string, userId: string): Promise<{ file: IFile, filePath: string }> {
-  //   const file = await this.getFile(fileId, userId);
-    
-  //   const fs = await import('fs');
-  //   const path = await import('path');
-    
-  //   if (!fs.existsSync(file.storagePath)) {
-  //     throw new AppError('File not found on server', 404);
-  //   }
-
-  //   return { file, filePath: file.storagePath };
-  // }
 
 
 
