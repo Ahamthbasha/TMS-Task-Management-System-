@@ -21,7 +21,7 @@ export class JwtService implements IJwtService {
   constructor() {
     this.accessSecret = this.getRequiredEnv("JWT_ACCESS_SECRET");
     this.refreshSecret = this.getRequiredEnv("JWT_REFRESH_SECRET");
-    this.accessExpiry = process.env.JWT_ACCESS_EXPIRY || "2m"; // fallback
+    this.accessExpiry = process.env.JWT_ACCESS_EXPIRY || "15m"; // fallback
     this.refreshExpiry = process.env.JWT_REFRESH_EXPIRY || "7d"; // fallback
   }
 

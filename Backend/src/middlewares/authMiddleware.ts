@@ -85,7 +85,7 @@ export class AuthMiddleware implements IAuthMiddleware {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
-          maxAge: 2 * 60 * 1000, // 2 minutes
+          maxAge: 15 * 60 * 1000, // 2 minutes
         });
 
         // Attach user to request
