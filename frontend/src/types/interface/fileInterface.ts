@@ -1,6 +1,3 @@
-// types/interface/fileInterface.ts
-
-// FileType constants object
 export const FileType = {
   IMAGE: 'image',
   DOCUMENT: 'document',

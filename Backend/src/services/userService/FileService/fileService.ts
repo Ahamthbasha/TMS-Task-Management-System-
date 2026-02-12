@@ -6,7 +6,6 @@ import { AppError } from '../../../utils/errorUtil/appError';
 import { ITaskRepository } from '../../../repositories/userRepo/taskRepo/IUserTaskRepo';
 import { ICommentRepository } from '../../../repositories/userRepo/commentRepo/ICommentRepo';
 import { Types } from 'mongoose';
-import path from 'path';
 
 export class FileService implements IFileService {
   constructor(

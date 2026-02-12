@@ -1,4 +1,3 @@
-// layouts/userLayout/SidebarWrapper.tsx
 
 import React from 'react';
 import SidebarLayout from './SidebarLayout';

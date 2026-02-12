@@ -1,4 +1,4 @@
-// src/services/taskService/ITaskService.ts
+
 import { ITask, TaskStatus, TaskPriority } from '../../../models/taskModel';
 import { IPaginatedTasks } from '../../../repositories/userRepo/taskRepo/IUserTaskRepo'; 
 
@@ -29,6 +29,8 @@ export interface IGetTasksQueryDTO {
   tags?: string[];
   dueDateFrom?: string;
   dueDateTo?: string;
+  createdAtFrom?: string; // Add this
+  createdAtTo?: string;   // Add this
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

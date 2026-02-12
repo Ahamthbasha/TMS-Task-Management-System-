@@ -4,59 +4,9 @@ import { AuthRequest } from '../../../middlewares/authMiddleware';
 import { IFileService } from '../../../services/userService/FileService/IFileService';
 import { IFileController } from './IFileController';
 import fs from 'fs';
-import path from 'path';
 
 export class FileController implements IFileController {
   constructor(private fileService: IFileService) {}
-
-  // uploadFile = async (
-  //   req: AuthRequest,
-  //   res: Response,
-  //   next: NextFunction
-  // ): Promise<void> => {
-  //   try {
-  //     if (!req.user) {
-  //       res.status(401).json({
-  //         success: false,
-  //         message: 'Unauthorized',
-  //       });
-  //       return;
-  //     }
-
-  //     if (!req.file) {
-  //       res.status(400).json({
-  //         success: false,
-  //         message: 'No file uploaded',
-  //       });
-  //       return;
-  //     }
-
-  //     const { taskId, commentId } = req.body;
-      
-  //     if (!taskId && !commentId) {
-  //       res.status(400).json({
-  //         success: false,
-  //         message: 'Either taskId or commentId must be provided',
-  //       });
-  //       return;
-  //     }
-
-  //     const file = await this.fileService.uploadFile({
-  //       file: req.file,
-  //       taskId,
-  //       commentId,
-  //       userId: req.user.userId,
-  //     });
-
-  //     res.status(201).json({
-  //       success: true,
-  //       message: 'File uploaded successfully',
-  //       data: file,
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
 
   uploadFile = async (
   req: AuthRequest,

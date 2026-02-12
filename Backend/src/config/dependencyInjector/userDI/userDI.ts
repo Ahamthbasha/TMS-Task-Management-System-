@@ -37,12 +37,23 @@ import { FileService } from "../../../services/userService/FileService/fileServi
 import { IFileController } from "../../../controllers/userController/fileController/IFileController";
 import { FileController } from "../../../controllers/userController/fileController/fileController";
 
+import { IAnalyticsRepository } from "../../../repositories/userRepo/analyticsRepo/IAnalyticsRepo";
+import { AnalyticsRepository } from "../../../repositories/userRepo/analyticsRepo/analyticsRepo";
+import { IAnalyticsService } from "../../../services/userService/analyticService/IAnalyticService";
+import { AnalyticsService } from "../../../services/userService/analyticService/analyticService";
+import { IAnalyticsController } from "../../../controllers/userController/analyticController/IAnalyticController";
+import { AnalyticsController } from "../../../controllers/userController/analyticController/analyticController";
+import { IUserService } from "../../../services/userService/userService/IUserService";
+import { UserService } from "../../../services/userService/userService/userService";
+
+
 const hashService : IHashingService = new HashingService()
 const jwtService : IJwtService = new JwtService()
 
 const userRepo : IUserRepository = new UserRepository()
 const userService : IAuthService = new AuthService(userRepo,hashService,jwtService)
-const userController : IAuthController = new AuthController(userService)
+const userAssignService : IUserService = new UserService(userRepo)
+const userController : IAuthController = new AuthController(userService,userAssignService)
 
 const authMiddleware : IAuthMiddleware = new AuthMiddleware(jwtService,userRepo)
 
@@ -72,11 +83,17 @@ const userTaskController : ITaskController = new TaskController(userTaskService,
 
 const userCommentController : ICommentController = new CommentController(userCommentService,userFileService)
 
+// analytics
+
+const userAnalyticRepo : IAnalyticsRepository = new AnalyticsRepository()
+const userAnalyticService : IAnalyticsService = new AnalyticsService(userAnalyticRepo)
+const userAnalyticController : IAnalyticsController = new AnalyticsController(userAnalyticService)
 
 export {
     userController,
     authMiddleware,
     userTaskController,
     userCommentController,
-    userFileController
+    userFileController,
+    userAnalyticController
 }

@@ -1,7 +1,6 @@
-// src/components/ui/PasswordField.tsx
 import { forwardRef, useState, type InputHTMLAttributes } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import "./PasswordField.css";
 
 interface PasswordFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -9,38 +8,32 @@ interface PasswordFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
-  ({ label, error, className, ...props }, ref) => {
+  ({ label, error, className, id, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
-      <div className="space-y-1.5">
-        <label
-          htmlFor={props.id}
-          className="block text-sm font-medium text-gray-700"
-        >
+      <div className="password-field-container">
+        <label htmlFor={id} className="password-label">
           {label}
         </label>
-        <div className="relative">
+        <div className="password-input-wrapper">
           <input
             ref={ref}
+            id={id}
             type={showPassword ? "text" : "password"}
-            className={cn(
-              "w-full px-4 py-3 pr-11 border border-gray-300 rounded-lg shadow-sm",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-              error ? "border-red-500 focus:ring-red-500" : "",
-              className,
-            )}
+            className={`password-input ${error ? 'password-error' : ''} ${className || ''}`}
             {...props}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+            className="password-toggle"
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
-        {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
+        {error && <p className="password-error-message">{error}</p>}
       </div>
     );
   },

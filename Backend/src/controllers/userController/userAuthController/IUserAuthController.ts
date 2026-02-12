@@ -6,4 +6,6 @@ export interface IAuthController {
   login(req: Request, res: Response, next: NextFunction): Promise<void>;
   logout(req: Request, res: Response, next: NextFunction): Promise<void>;
   getCurrentUser(req: AuthRequest, res: Response, next: NextFunction): Promise<void>;
+  searchUsers(req: AuthRequest, res: Response, next: NextFunction): Promise<void>
+  getAllUsers(req: AuthRequest, res: Response, next: NextFunction): Promise<void>
 }

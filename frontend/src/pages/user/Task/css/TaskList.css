@@ -1,0 +1,381 @@
+
+.tasklist-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .tasklist-container {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tasklist-container {
+    padding: 2rem 2rem;
+  }
+}
+
+.tasklist-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ========== TASK LIST HEADER ========== */
+.tasklist-header {
+  margin-bottom: 2rem;
+}
+
+.tasklist-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.tasklist-subtitle {
+  color: #4b5563;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.tasklist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* ========== TASK LIST BUTTONS ========== */
+.tasklist-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.tasklist-btn-primary {
+  background-color: #2563eb;
+}
+
+.tasklist-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.tasklist-btn-success {
+  background-color: #16a34a;
+}
+
+.tasklist-btn-success:hover {
+  background-color: #15803d;
+}
+
+.tasklist-btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ========== LOADING STATE ========== */
+.tasklist-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.tasklist-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tasklist-loading-text {
+  color: #4b5563;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* ========== RESULTS SUMMARY ========== */
+.tasklist-summary {
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+/* ========== TASK GRID ========== */
+.tasklist-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .tasklist-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tasklist-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ========== PAGINATION ========== */
+.tasklist-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-number {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.pagination-number:hover {
+  background-color: #f9fafb;
+}
+
+.pagination-number.active {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination-ellipsis {
+  padding: 0 0.5rem;
+  color: #9ca3af;
+}
+
+/* ========== EMPTY STATE ========== */
+.tasklist-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  color: #9ca3af;
+}
+
+.empty-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-message {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0 0 1.5rem 0;
+}
+
+.empty-button {
+  padding: 0.5rem 1.5rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.empty-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* ========== ERROR STATE ========== */
+.tasklist-error-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+}
+
+.tasklist-error-content {
+  text-align: center;
+  color: #dc2626;
+}
+
+.tasklist-error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.tasklist-error-message {
+  margin-bottom: 1rem;
+  color: #4b5563;
+}
+
+.tasklist-error-button {
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tasklist-error-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* ========== RESPONSIVE ADJUSTMENTS ========== */
+@media (max-width: 640px) {
+  .tasklist-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .tasklist-title {
+    font-size: 1.5rem;
+  }
+  
+  .tasklist-actions {
+    flex-direction: column;
+  }
+  
+  .tasklist-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .tasklist-pagination {
+    flex-wrap: wrap;
+  }
+  
+  .pagination-pages {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .pagination-number {
+    padding: 0.375rem 0.75rem;
+    min-width: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-pages {
+    flex-wrap: wrap;
+  }
+  
+  .pagination-number {
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* ========== DARK MODE SUPPORT (Optional) ========== */
+@media (prefers-color-scheme: dark) {
+  .tasklist-container {
+    background-color: #111827;
+  }
+  
+  .tasklist-title {
+    color: #f9fafb;
+  }
+  
+  .tasklist-subtitle {
+    color: #e5e7eb;
+  }
+  
+  .tasklist-empty {
+    background-color: #1f2937;
+  }
+  
+  .empty-title {
+    color: #f3f4f6;
+  }
+  
+  .pagination-btn,
+  .pagination-number {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #e5e7eb;
+  }
+  
+  .pagination-btn:hover:not(:disabled),
+  .pagination-number:hover {
+    background-color: #374151;
+  }
+  
+  .tasklist-summary {
+    color: #e5e7eb;
+  }
+}

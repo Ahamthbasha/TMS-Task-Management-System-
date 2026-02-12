@@ -1,4 +1,4 @@
-// src/repositories/taskRepo/ITaskRepo.ts
+
 import { IGenericRepository } from '../../genericRepo/interface/IGenericRepo';
 import { ITask, TaskStatus, TaskPriority } from '../../../models/taskModel';
 

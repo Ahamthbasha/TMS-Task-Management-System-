@@ -1,0 +1,157 @@
+/* src/components/commentComponent/CommentCard.css */
+
+.comment-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.comment-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== COMMENT HEADER ========== */
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .comment-header {
+    flex-direction: column;
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: #2563eb;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.comment-edited {
+  color: #9ca3af;
+  margin-left: 0.25rem;
+}
+
+/* ========== COMMENT CONTENT ========== */
+.comment-content {
+  margin-bottom: 1rem;
+}
+
+.comment-text {
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.875rem;
+}
+
+/* ========== COMMENT ACTIONS ========== */
+.comment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.action-btn {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  color: #2563eb;
+}
+
+.edit-btn:hover {
+  color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+.delete-btn {
+  color: #dc2626;
+}
+
+.delete-btn:hover {
+  color: #b91c1c;
+  background-color: #fee2e2;
+}
+
+.delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+  .comment-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .user-name {
+    color: #f9fafb;
+  }
+  
+  .comment-text {
+    color: #e5e7eb;
+  }
+  
+  .comment-actions {
+    border-top-color: #374151;
+  }
+}

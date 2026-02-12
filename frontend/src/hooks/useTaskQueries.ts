@@ -1,5 +1,3 @@
-// hooks/useTaskQueries.ts
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   createTask,
@@ -18,7 +16,6 @@ import type {
 import type { AxiosErrorResponse } from '../types/interface/errorInterface';
 import { toast } from 'react-toastify';
 
-// Query Keys
 export const taskKeys = {
   all: ['tasks'] as const,
   lists: () => [...taskKeys.all, 'list'] as const,
@@ -27,9 +24,6 @@ export const taskKeys = {
   detail: (id: string) => [...taskKeys.details(), id] as const,
 };
 
-/**
- * Hook to fetch all tasks with filters
- */
 export const useGetTasks = (params?: IGetTasksQueryParams) => {
   return useQuery({
     queryKey: taskKeys.list(params || {}),
@@ -38,9 +32,7 @@ export const useGetTasks = (params?: IGetTasksQueryParams) => {
   });
 };
 
-/**
- * Hook to fetch a single task by ID
- */
+
 export const useGetTaskById = (taskId: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: taskKeys.detail(taskId),
@@ -48,29 +40,6 @@ export const useGetTaskById = (taskId: string, enabled: boolean = true) => {
     enabled: enabled && !!taskId,
   });
 };
-
-/**
- * Hook to create a new task
- */
-// export const useCreateTask = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: (data: ICreateTaskDTO) => createTask(data),
-//     onSuccess: (response) => {
-//       queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
-//       toast.success(response.message || 'Task created successfully');
-//     },
-//     onError: (error: AxiosErrorResponse) => {
-//       const errorMessage =
-//         error?.response?.data?.message ||
-//         error?.message ||
-//         'Failed to create task';
-//       toast.error(errorMessage);
-//     },
-//   });
-// };
-
 
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
@@ -97,13 +66,8 @@ export const useCreateTask = () => {
   });
 };
 
-
-/**
- * Hook to update an existing task
- */
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ taskId, data }: { taskId: string; data: IUpdateTaskDTO }) =>
       updateTask(taskId, data),
@@ -122,9 +86,6 @@ export const useUpdateTask = () => {
   });
 };
 
-/**
- * Hook to delete a task
- */
 export const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
@@ -144,9 +105,6 @@ export const useDeleteTask = () => {
   });
 };
 
-/**
- * Hook to bulk create tasks
- */
 export const useBulkCreateTasks = () => {
   const queryClient = useQueryClient();
 

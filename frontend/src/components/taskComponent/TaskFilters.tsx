@@ -1,7 +1,8 @@
-// components/tasks/TaskFilters.tsx
+
 
 import React, { useState } from 'react';
 import { TaskStatus, TaskPriority, type IGetTasksQueryParams } from '../../types/interface/taskInterface';
+import './css/TaskFilter.css'
 
 interface TaskFiltersProps {
   filters: IGetTasksQueryParams;
@@ -29,21 +30,21 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+    <div className="filters-container">
+      <div className="filters-header">
+        <h2 className="filters-title">Filters</h2>
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm text-blue-600 hover:text-blue-700"
+          className="filters-toggle"
         >
           {showAdvanced ? 'Hide' : 'Show'} Advanced Filters
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="filters-grid">
         {/* Search */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="filter-item">
+          <label className="filter-label">
             Search
           </label>
           <input
@@ -51,19 +52,19 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
             placeholder="Search tasks..."
             value={filters.search || ''}
             onChange={(e) => handleInputChange('search', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="filter-input"
           />
         </div>
 
         {/* Status Filter */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="filter-item">
+          <label className="filter-label">
             Status
           </label>
           <select
             value={filters.status || ''}
             onChange={(e) => handleInputChange('status', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="filter-select"
           >
             <option value="">All Statuses</option>
             {Object.values(TaskStatus).map((status) => (
@@ -75,14 +76,14 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
         </div>
 
         {/* Priority Filter */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="filter-item">
+          <label className="filter-label">
             Priority
           </label>
           <select
             value={filters.priority || ''}
             onChange={(e) => handleInputChange('priority', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="filter-select"
           >
             <option value="">All Priorities</option>
             {Object.values(TaskPriority).map((priority) => (
@@ -96,36 +97,36 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
 
       {/* Advanced Filters */}
       {showAdvanced && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200">
+        <div className="advanced-filters">
           {/* Due Date From */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="filter-item">
+            <label className="filter-label">
               Due Date From
             </label>
             <input
               type="date"
               value={filters.dueDateFrom || ''}
               onChange={(e) => handleInputChange('dueDateFrom', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="filter-input"
             />
           </div>
 
           {/* Due Date To */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="filter-item">
+            <label className="filter-label">
               Due Date To
             </label>
             <input
               type="date"
               value={filters.dueDateTo || ''}
               onChange={(e) => handleInputChange('dueDateTo', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="filter-input"
             />
           </div>
 
           {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="filter-item">
+            <label className="filter-label">
               Tags (comma-separated)
             </label>
             <input
@@ -133,19 +134,19 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
               placeholder="tag1, tag2"
               value={filters.tags || ''}
               onChange={(e) => handleInputChange('tags', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="filter-input"
             />
           </div>
 
           {/* Sort By */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="filter-item">
+            <label className="filter-label">
               Sort By
             </label>
             <select
               value={filters.sortBy || 'createdAt'}
               onChange={(e) => handleInputChange('sortBy', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="filter-select"
             >
               <option value="createdAt">Created Date</option>
               <option value="updatedAt">Updated Date</option>
@@ -157,14 +158,14 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
           </div>
 
           {/* Sort Order */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="filter-item">
+            <label className="filter-label">
               Sort Order
             </label>
             <select
               value={filters.sortOrder || 'desc'}
               onChange={(e) => handleInputChange('sortOrder', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="filter-select"
             >
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
@@ -172,14 +173,14 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
           </div>
 
           {/* Items per page */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="filter-item">
+            <label className="filter-label">
               Items per page
             </label>
             <select
               value={filters.limit || 10}
               onChange={(e) => handleInputChange('limit', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="filter-select"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -192,10 +193,10 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({ filters, onFilterChange }) =>
       )}
 
       {/* Clear Filters Button */}
-      <div className="mt-4 flex justify-end">
+      <div className="filters-footer">
         <button
           onClick={handleClearFilters}
-          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="filters-clear-btn"
         >
           Clear All Filters
         </button>

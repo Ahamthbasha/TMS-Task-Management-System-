@@ -1,5 +1,3 @@
-// api/userAction/userAction.ts
-
 import { API } from "../../service/axios";
 import userRouterEndPoints from "../../endpoints/userEndpoint";
 import type {
@@ -27,6 +25,22 @@ import type {
   IUploadFileDTO,
   IUploadFileResponse,
 } from "../../types/interface/fileInterface";
+import type { AnalyticsApiResponse,IExportTasksData, ITaskOverviewStats, ITaskTrendPoint, ITaskTrendsQueryParams, IUserPerformanceMetric,} from "@/types/interface/analyticsInterface";
+
+export interface ExportFilters {
+  status?: string;
+  priority?: string;
+  assignedTo?: string;
+  dueDateFrom?: string;
+  dueDateTo?: string;
+  createdAtFrom?: string;
+  createdAtTo?: string;
+  search?: string;
+  tags?: string[];
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
 
 
 // Helper to create FormData for task creation with files
@@ -118,33 +132,6 @@ export const bulkCreateTasks = async (
   const response = await API.post(userRouterEndPoints.userBulkTask, data);
   return response.data;
 };
-
-// export const createCommentWithFiles = async (
-//   data: ICreateCommentDTO,
-//   files?: File[]
-// ): Promise<CommentApiResponse<IComment & { files?: IFile[] }>> => {
-//   const formData = new FormData();
-//   formData.append('content', data.content);
-//   formData.append('taskId', data.taskId);
-  
-//   // Append files if any
-//   if (files && files.length > 0) {
-//     files.forEach((file) => {
-//       formData.append('files', file);
-//     });
-//   }
-  
-//   const response = await API.post(
-//     userRouterEndPoints.userCreateCommentWithFiles,
-//     formData,
-//     {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//       },
-//     }
-//   );
-//   return response.data;
-// };
 
 export const createComment = async (
   data: ICreateCommentDTO,
@@ -270,44 +257,6 @@ export const getFile = async (fileId: string): Promise<IUploadFileResponse> => {
   return response.data;
 };
 
-
-// export const downloadFile = async (fileId: string): Promise<{ blob: Blob; filename: string }> => {
-//   const response = await API.get(
-//     `${userRouterEndPoints.userDownloadFile}/${fileId}/download`,
-//     {
-//       responseType: "blob",
-//     },
-//   );
-  
-//   // Extract filename from content-disposition header
-//   let filename = `file-${fileId}`;
-//   const contentDisposition = response.headers['content-disposition'];
-  
-//   if (contentDisposition) {
-//     const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-//     if (filenameMatch && filenameMatch[1]) {
-//       // Remove quotes if present
-//       filename = filenameMatch[1].replace(/['"]/g, '');
-//       // Decode URI encoded filename
-//       try {
-//         filename = decodeURIComponent(filename);
-//       } catch (e) {
-//         console.warn('Failed to decode filename:', e);
-//       }
-//     }
-//   }
-  
-//   return {
-//     blob: response.data,
-//     filename
-//   };
-// };
-
-
-
-// Get task files (task-level files only)
-
-// api/userAction/userAction.ts - Updated downloadFile function
 export const downloadFile = async (fileId: string): Promise<{ blob: Blob; filename: string }> => {
   const response = await API.get(
     `${userRouterEndPoints.userDownloadFile}/${fileId}/download`,
@@ -378,8 +327,6 @@ export const downloadFile = async (fileId: string): Promise<{ blob: Blob; filena
   };
 };
 
-
-
 export const getTaskFiles = async (
   taskId: string,
 ): Promise<IGetFilesResponse> => {
@@ -389,7 +336,6 @@ export const getTaskFiles = async (
   return response.data;
 };
 
-// Get all task files (including comment files)
 export const getAllTaskFiles = async (
   taskId: string,
 ): Promise<IGetFilesResponse> => {
@@ -399,7 +345,6 @@ export const getAllTaskFiles = async (
   return response.data;
 };
 
-// Get comment files
 export const getCommentFiles = async (
   commentId: string,
 ): Promise<IGetFilesResponse> => {
@@ -409,7 +354,6 @@ export const getCommentFiles = async (
   return response.data;
 };
 
-// Delete file
 export const deleteFile = async (
   fileId: string,
 ): Promise<IDeleteFileResponse> => {
@@ -419,10 +363,7 @@ export const deleteFile = async (
   return response.data;
 };
 
-// Helper to get file preview URL
 export const getFilePreviewUrl = (file: IFile): string => {
-  // In production, this would be a signed URL from cloud storage
-  // For now, use the fileUrl from backend
   return file.fileUrl;
 };
 
@@ -434,8 +375,6 @@ export const uploadMultipleFiles = async (
   return Promise.all(uploadPromises);
 };
 
-
-// api/userAction/userAction.ts (CORRECTED)
 export const createCommentWithFiles = async (
   data: ICreateCommentDTO,
   files: File[]
@@ -470,3 +409,62 @@ export const createCommentWithFiles = async (
   console.log('Response:', response.data);
   return response.data;
 };
+
+// Get task overview statistics
+export const getTaskOverviewStats = async (): Promise<AnalyticsApiResponse<ITaskOverviewStats>> => {
+  const response = await API.get(userRouterEndPoints.analyticsOverview);
+  return response.data;
+};
+
+// Get user performance metrics
+export const getUserPerformanceMetrics = async (): Promise<AnalyticsApiResponse<IUserPerformanceMetric[]>> => {
+  const response = await API.get(userRouterEndPoints.analyticsUserPerformance);
+  return response.data;
+};
+
+// Get task trends over time
+export const getTaskTrendsOverTime = async (
+  params: ITaskTrendsQueryParams
+): Promise<AnalyticsApiResponse<ITaskTrendPoint[]>> => {
+  const response = await API.get(userRouterEndPoints.analyticsTaskTrends, { params });
+  return response.data;
+};
+
+// Export tasks data - with proper union type for filters
+export const exportTasksData = async (
+  filters?: IGetTasksQueryParams | ExportFilters | Record<string, string | undefined>,
+  format: 'json' | 'csv' | 'excel' = 'excel'
+): Promise<AnalyticsApiResponse<IExportTasksData>> => {
+  // Filter out undefined values
+  const cleanedFilters = filters 
+    ? Object.fromEntries(
+        Object.entries(filters).filter(([, value]) => value !== undefined && value !== '')
+      )
+    : {};
+  
+  const params = { ...cleanedFilters, format };
+  const response = await API.get(userRouterEndPoints.analyticsExport, { params });
+  return response.data;
+};
+
+// Download exported file
+export const downloadExportedFile = async (filename: string): Promise<Blob> => {
+  const response = await API.get(
+    `${userRouterEndPoints.analyticsExportDownload}/${encodeURIComponent(filename)}`,
+    { responseType: 'blob' }
+  );
+  return response.data;
+};
+
+// Helper to trigger download
+export const triggerFileDownload = (blob: Blob, filename: string): void => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};
+

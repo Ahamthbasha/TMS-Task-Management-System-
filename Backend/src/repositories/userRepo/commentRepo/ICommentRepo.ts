@@ -7,6 +7,17 @@ export interface IPopulatedCommentUser {
   email: string;
 }
 
+export interface IPopulatedCommentFile {
+  _id: string;
+  filename: string;
+  originalName: string;
+  fileUrl: string;
+  fileType: string;
+  mimeType: string;
+  size: number;
+  uploadedBy: IPopulatedCommentUser;
+}
+
 export interface ICommentResponse {
   _id: string;
   content: string;
@@ -16,6 +27,7 @@ export interface ICommentResponse {
   deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  files?: IPopulatedCommentFile[]; // ADD THIS
 }
 
 export interface ICommentFilters {
@@ -53,5 +65,8 @@ export interface ICommentRepository extends IGenericRepository<IComment> {
   
   findByIdWithPopulate(id: string): Promise<IComment | null>;
   
-  findByTaskIdWithPopulate(taskId: string, paginationOptions: ICommentPaginationOptions): Promise<IPaginatedComments>;
+  findByTaskIdWithPopulate(
+    taskId: string, 
+    paginationOptions: ICommentPaginationOptions
+  ): Promise<IPaginatedComments>;
 }

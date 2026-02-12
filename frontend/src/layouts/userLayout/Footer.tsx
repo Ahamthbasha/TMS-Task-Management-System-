@@ -1,13 +1,15 @@
+import "./css/Footer.css";
+
 const Footer = () => {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="text-center">
-          <p className="text-gray-600 text-sm">
+    <footer className="footer">
+      <div className="footer-container">
+        <div className="footer-content">
+          <p className="footer-text">
             Task Management App crafted by{" "}
-            <span className="font-semibold text-gray-800">Ahamathbasha</span>
+            <span className="footer-highlight">Ahamathbasha</span>
           </p>
-          <p className="text-gray-500 text-xs mt-2">
+          <p className="footer-copyright">
             © {new Date().getFullYear()} All rights reserved
           </p>
         </div>

@@ -1,8 +1,7 @@
-// components/tasks/TaskCard.tsx
-
 import React from 'react';
 import { type ITask, TaskStatus, TaskPriority, type TaskStatusType, type TaskPriorityType } from '../../types/interface/taskInterface';
 import { format } from 'date-fns';
+import './css/TaskCard.css';
 
 interface TaskCardProps {
   task: ITask;
@@ -12,7 +11,6 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) => {
-  // Get current user to check permissions
   const getCurrentUser = () => {
     try {
       const userStr = localStorage.getItem("user");
@@ -33,33 +31,33 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) =
   const isTaskOwner = currentUser && task.createdBy._id === currentUser._id;
   const isAssigned = currentUser && task.assignedTo && task.assignedTo._id === currentUser._id;
 
-  const getStatusColor = (status: TaskStatusType) => {
+  const getStatusColorClass = (status: TaskStatusType) => {
     switch (status) {
       case TaskStatus.TODO:
-        return 'bg-gray-100 text-gray-800';
+        return 'status-todo';
       case TaskStatus.IN_PROGRESS:
-        return 'bg-blue-100 text-blue-800';
+        return 'status-progress';
       case TaskStatus.COMPLETED:
-        return 'bg-green-100 text-green-800';
+        return 'status-completed';
       case TaskStatus.CANCELLED:
-        return 'bg-red-100 text-red-800';
+        return 'status-cancelled';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'status-todo';
     }
   };
 
-  const getPriorityColor = (priority: TaskPriorityType) => {
+  const getPriorityColorClass = (priority: TaskPriorityType) => {
     switch (priority) {
       case TaskPriority.LOW:
-        return 'bg-green-100 text-green-800 border-green-300';
+        return 'priority-low';
       case TaskPriority.MEDIUM:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        return 'priority-medium';
       case TaskPriority.HIGH:
-        return 'bg-orange-100 text-orange-800 border-orange-300';
+        return 'priority-high';
       case TaskPriority.URGENT:
-        return 'bg-red-100 text-red-800 border-red-300';
+        return 'priority-urgent';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return 'priority-medium';
     }
   };
 
@@ -76,46 +74,43 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) =
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+      className="task-card"
       onClick={() => onView && onView(task._id)}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-900 flex-1 mr-2">
+      <div className="task-card-header">
+        <h3 className="task-title">
           {task.title}
         </h3>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+        <span className={`task-priority ${getPriorityColorClass(task.priority)}`}>
           {task.priority.toUpperCase()}
         </span>
       </div>
 
       {/* Description */}
       {task.description && (
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+        <p className="task-description">
           {task.description}
         </p>
       )}
 
       {/* Status */}
-      <div className="mb-4">
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+      <div className="task-status-container">
+        <span className={`task-status ${getStatusColorClass(task.status)}`}>
           {task.status.replace('_', ' ').toUpperCase()}
         </span>
       </div>
 
       {/* Tags */}
       {task.tags && task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="task-tags">
           {task.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-            >
+            <span key={index} className="task-tag">
               #{tag}
             </span>
           ))}
           {task.tags.length > 3 && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+            <span className="task-tag">
               +{task.tags.length - 3} more
             </span>
           )}
@@ -124,8 +119,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) =
 
       {/* Due Date */}
       {task.dueDate && (
-        <div className={`text-sm mb-4 ${isOverdue ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
-          <span className="font-medium">Due: </span>
+        <div className={`task-due-date ${isOverdue ? 'task-overdue' : ''}`}>
+          <span className="task-due-label">Due: </span>
           {formatDate(task.dueDate)}
           {isOverdue && ' (Overdue)'}
         </div>
@@ -133,28 +128,28 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) =
 
       {/* Assigned To */}
       {task.assignedTo && (
-        <div className="text-sm text-gray-600 mb-4 flex items-center">
-          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-semibold mr-2">
+        <div className="task-assigned">
+          <div className="task-assigned-avatar">
             {task.assignedTo.name.charAt(0).toUpperCase()}
           </div>
-          <span className="font-medium">Assigned to: </span>
-          <span className="ml-1">{task.assignedTo.name}</span>
+          <span className="task-assigned-label">Assigned to: </span>
+          <span className="task-assigned-name">{task.assignedTo.name}</span>
         </div>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-        <div className="text-xs text-gray-500">
+      <div className="task-footer">
+        <div className="task-created">
           Created {formatDate(task.createdAt)}
         </div>
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="task-actions" onClick={(e) => e.stopPropagation()}>
           {onView && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onView(task._id);
               }}
-              className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+              className="task-btn task-btn-view"
             >
               View
             </button>
@@ -166,7 +161,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) =
                 e.stopPropagation();
                 onEdit(task._id);
               }}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              className="task-btn task-btn-edit"
             >
               {isTaskOwner ? 'Edit' : 'Update Status'}
             </button>
@@ -178,7 +173,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onView }) =
                 e.stopPropagation();
                 onDelete(task._id);
               }}
-              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              className="task-btn task-btn-delete"
             >
               Delete
             </button>

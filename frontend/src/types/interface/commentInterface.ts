@@ -1,12 +1,24 @@
-// types/interface/commentInterface.ts
-import type { IFile } from './fileInterface';
-
 export interface IPopulatedCommentUser {
   _id: string;
   name: string;
   email: string;
 }
 
+export interface IPopulatedCommentFileUser {
+  _id: string;
+  name: string;
+  email: string;
+}
+export interface ICommentFile {
+  _id: string;
+  filename: string;
+  originalName: string;
+  fileUrl: string;
+  fileType: string;
+  mimeType: string;
+  size: number;
+  uploadedBy: IPopulatedCommentFileUser;
+}
 export interface IComment {
   _id: string;
   content: string;
@@ -16,11 +28,11 @@ export interface IComment {
   deletedAt?: Date | string;
   createdAt: Date | string;
   updatedAt: Date | string;
+  files?: ICommentFile[]; // ADD THIS
 }
 
-// NEW: Interface for comment with files
 export interface ICommentWithFiles extends IComment {
-  files?: IFile[];
+  files?: ICommentFile[];
 }
 
 export interface IPaginatedComments {
@@ -46,7 +58,6 @@ export interface IGetCommentsParams {
   limit?: number;
 }
 
-// Update CommentApiResponse to include ICommentWithFiles
 export interface CommentApiResponse<T = IComment | IPaginatedComments | ICommentWithFiles | null> {
   success: boolean;
   message: string;

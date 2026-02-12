@@ -7,22 +7,45 @@ export class UserRepository extends GenericRepository<IUser> implements IUserRep
     super(User);
   }
 
-  // No .exec() needed — findOne already returns Promise<IUser | null>
   async findByEmail(email: string): Promise<IUser | null> {
     return this.findOne({ email, isActive: true });
   }
 
-  // For password we need .select('+password') → so we must go to the model directly here
   async findByEmailWithPassword(email: string): Promise<IUser | null> {
     return this.model
       .findOne({ email, isActive: true })
       .select('+password')
-      .lean()           // optional: faster if you don't need mongoose document methods
+      .lean()         
       .exec();
   }
 
-  // Your current findById is already correct (no extra .exec())
   async findById(id: string): Promise<IUser | null> {
-    return super.findById(id);   // ← calls generic findById → already Promise
+    return super.findById(id); 
+  }
+
+  async searchUsers(query: string, excludeUserId: string): Promise<IUser[]> {
+    if (!query || query.length < 2) return [];
+    
+    return this.model.find({
+      _id: { $ne: excludeUserId },
+      isActive: true,
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    })
+    .select('_id name email role')
+    .limit(10)
+    .lean();
+  }
+
+  async getAllActiveUsers(excludeUserId: string): Promise<IUser[]> {
+    return this.model.find({
+      _id: { $ne: excludeUserId },
+      isActive: true
+    })
+    .select('_id name email role')
+    .limit(50)
+    .lean();
   }
 }

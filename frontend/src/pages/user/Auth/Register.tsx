@@ -1,13 +1,13 @@
-// src/pages/auth/Register.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { type AxiosError } from "axios";
-import InputField from "../../../components/Inputfield";
-import PasswordField from "../../../components/Passwordfield";
+import InputField from "../../../components/Inputfield"; 
+import PasswordField from "../../../components/Passwordfield"; 
 import { registerUser } from "../../../api/authAction/userAuth";
+import "./css/Register.css";
 
 const registerSchema = z
   .object({
@@ -65,37 +65,34 @@ export default function Register() {
       if (err.response?.data) {
         const responseData = err.response.data;
 
-        // Check if there are validation errors array
         if (responseData.errors && Array.isArray(responseData.errors)) {
-          // Show each validation error
           responseData.errors.forEach((validationErr, index) => {
             toast.error(validationErr.msg, {
               toastId: `error-${validationErr.path}-${index}`,
             });
           });
         } else if (responseData.message) {
-          // Show the general error message if no specific errors array
           toast.error(responseData.message);
         } else {
-          // Fallback error message
           toast.error("Registration failed. Please try again.");
         }
       } else {
-        // Network or other errors
         toast.error("Network error. Please check your connection and try again.");
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">TSK</h1>
-          <p className="mt-2 text-gray-600">Create your account to start managing tasks</p>
+    <div className="register-container">
+      <div className="register-card">
+        <div className="register-header">
+          <h1 className="register-title">TSK</h1>
+          <p className="register-subtitle">
+            Create your account to start managing tasks
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="register-form">
           <InputField
             label="Full Name"
             id="name"
@@ -133,15 +130,15 @@ export default function Register() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition"
+            className="register-button"
           >
             {isSubmitting ? "Creating account..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="register-footer">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">
+          <Link to="/login" className="register-link">
             Sign in
           </Link>
         </p>

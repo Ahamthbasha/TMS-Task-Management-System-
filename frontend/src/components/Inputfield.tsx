@@ -1,6 +1,5 @@
-// src/components/ui/InputField.tsx
 import { type InputHTMLAttributes, forwardRef } from "react";
-import { cn } from "@/lib/utils";
+import "./InputField.css";
 
 interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -8,27 +7,19 @@ interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-  ({ label, error, className, ...props }, ref) => {
+  ({ label, error, className, id, ...props }, ref) => {
     return (
-      <div className="space-y-1.5">
-        <label
-          htmlFor={props.id}
-          className="block text-sm font-medium text-gray-700"
-        >
+      <div className="input-field-container">
+        <label htmlFor={id} className="input-label">
           {label}
         </label>
         <input
           ref={ref}
-          className={cn(
-            "w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-            "transition-all duration-200 bg-white",
-            error ? "border-red-500 focus:ring-red-500" : "",
-            className,
-          )}
+          id={id}
+          className={`input-field ${error ? 'input-error' : ''} ${className || ''}`}
           {...props}
         />
-        {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
+        {error && <p className="input-error-message">{error}</p>}
       </div>
     );
   },

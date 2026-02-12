@@ -1,0 +1,372 @@
+/* src/components/fileComponent/FileUpload.css */
+
+.fileupload-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+/* ========== UPLOAD AREA ========== */
+.upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.upload-area:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.upload-area.dragging {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-icon-wrapper {
+  width: 3rem;
+  height: 3rem;
+  background-color: #dbeafe;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.upload-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #2563eb;
+}
+
+.upload-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.25rem 0;
+}
+
+.upload-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.upload-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+.file-input {
+  display: none;
+}
+
+/* ========== ERROR MESSAGE ========== */
+.error-message {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+}
+
+.error-text {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+/* ========== SELECTED FILES ========== */
+.selected-files {
+  margin-top: 1rem;
+}
+
+.selected-files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.selected-files-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.clear-all-btn {
+  font-size: 0.875rem;
+  color: #dc2626;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0.25rem 0.5rem;
+}
+
+.clear-all-btn:hover {
+  color: #b91c1c;
+}
+
+.selected-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.selected-files-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.selected-files-list::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.selected-files-list::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 9999px;
+}
+
+.selected-files-list::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.selected-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.selected-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.file-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0 0.25rem 0;
+}
+
+.file-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.meta-separator {
+  color: #d1d5db;
+}
+
+.remove-file-btn {
+  padding: 0.25rem;
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-file-btn:hover {
+  color: #dc2626;
+}
+
+.remove-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ========== UPLOAD ACTIONS ========== */
+.upload-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* ========== BUTTONS ========== */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-cancel {
+  background-color: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn-cancel:hover {
+  background-color: #f9fafb;
+}
+
+.btn-upload {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.5rem 1.5rem;
+}
+
+.btn-upload:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-upload:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ========== SPINNER ========== */
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-white {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 640px) {
+  .upload-area {
+    padding: 1rem;
+  }
+  
+  .upload-title {
+    font-size: 1rem;
+  }
+  
+  .selected-file-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .remove-file-btn {
+    align-self: flex-end;
+  }
+  
+  .upload-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ========== DARK MODE ========== */
+@media (prefers-color-scheme: dark) {
+  .fileupload-container {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .upload-area {
+    border-color: #4b5563;
+  }
+  
+  .upload-area:hover {
+    background-color: #111827;
+  }
+  
+  .upload-title {
+    color: #e5e7eb;
+  }
+  
+  .selected-file-item {
+    background-color: #111827;
+    border-color: #374151;
+  }
+  
+  .file-name {
+    color: #f9fafb;
+  }
+  
+  .btn-cancel {
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #e5e7eb;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #374151;
+  }
+  
+  .selected-files-list::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+  
+  .selected-files-list::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+}

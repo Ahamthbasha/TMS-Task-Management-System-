@@ -1,4 +1,4 @@
-// types/interface/commentApiInterface.ts
+
 import {type IComment, type IPaginatedComments, type ICommentWithFiles } from './commentInterface';
 
 export interface CommentApiResponse<T = IComment | IPaginatedComments | ICommentWithFiles | null> {

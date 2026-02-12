@@ -1,45 +1,47 @@
-// components/commentComponent/CommentCard.tsx - UPDATED with better delete handling
 
 import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 import { type IComment } from '../../types/interface/commentInterface';
 import CommentModal from './CommentModal';
+import CommentFiles from './CommentFiles';
 import { useDeleteComment } from '../../hooks/useCommentQueries';
+import { fileKeys } from '../../hooks/useFileQueries';
+import ConfirmationDialog from '../ConfirmationDialog'; 
+import './css/CommentCard.css';
 
 interface CommentCardProps {
   comment: IComment;
   currentUserId?: string;
   taskId?: string;
   onUpdate?: () => void;
+  onDelete?: () => void;
 }
 
 const CommentCard: React.FC<CommentCardProps> = ({ 
   comment, 
   currentUserId,
   taskId: propTaskId,
-  onUpdate 
+  onUpdate,
+  onDelete
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
   
-  // Use taskId from prop or from comment
   const taskId = propTaskId || comment.taskId;
-  
-  // Pass taskId to the delete hook for optimistic updates
   const { mutate: deleteComment, isPending: isDeleting } = useDeleteComment(taskId);
 
-  // Use useMemo to calculate isEditable to avoid impure function calls during render
   const { isCommentOwner, isEditable } = useMemo(() => {
     if (!currentUserId || !comment.createdBy?._id) {
       return { isCommentOwner: false, isEditable: false };
     }
 
-    // Normalize IDs for comparison (handle both string and ObjectId)
     const normalizedCurrentUserId = String(currentUserId).trim();
     const normalizedCommentOwnerId = String(comment.createdBy._id).trim();
     
     const owner = normalizedCurrentUserId === normalizedCommentOwnerId;
     
-    // Calculate the 24-hour window
     try {
       const commentDate = new Date(comment.createdAt);
       const twentyFourHoursAgo = new Date();
@@ -67,27 +69,29 @@ const CommentCard: React.FC<CommentCardProps> = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
-      deleteComment(comment._id, {
-        onSuccess: () => {
-          // Call onUpdate after successful deletion
-          if (onUpdate) {
-            setTimeout(() => {
-              onUpdate();
-            }, 100);
-          }
-        },
-        onError: (error) => {
-          console.error('Delete comment error:', error);
+    deleteComment(comment._id, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: fileKeys.taskAll(taskId) });
+        
+        if (onUpdate) {
+          setTimeout(() => {
+            onUpdate();
+          }, 100);
         }
-      });
-    }
+        
+        if (onDelete) {
+          onDelete();
+        }
+      },
+      onError: (error) => {
+        console.error('Delete comment error:', error);
+      }
+    });
   };
 
   const handleEditSuccess = () => {
     console.log('Comment edit successful');
     setIsEditModalOpen(false);
-    // Call onUpdate after successful edit
     if (onUpdate) {
       setTimeout(() => {
         onUpdate();
@@ -95,7 +99,13 @@ const CommentCard: React.FC<CommentCardProps> = ({
     }
   };
 
-  // Check if comment has been edited
+  const handleFileDeleteSuccess = () => {
+    if (onUpdate) {
+      onUpdate();
+    }
+    queryClient.invalidateQueries({ queryKey: fileKeys.taskAll(taskId) });
+  };
+
   const isEdited = useMemo(() => {
     if (!comment.createdAt || !comment.updatedAt) return false;
     try {
@@ -107,50 +117,59 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className="comment-card">
         {/* Comment Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+        <div className="comment-header">
+          <div className="user-info">
+            <div className="user-avatar">
               {comment.createdBy?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-            <div>
-              <h4 className="font-semibold text-gray-900">
+            <div className="user-details">
+              <h4 className="user-name">
                 {comment.createdBy?.name || 'Unknown User'}
               </h4>
-              <p className="text-xs text-gray-500">
+              <p className="user-email">
                 {comment.createdBy?.email || 'No email'}
               </p>
             </div>
           </div>
-          <div className="text-xs text-gray-500">
-            {formatDate(comment.createdAt)}
+          <div className="comment-meta">
+            <span className="comment-date">{formatDate(comment.createdAt)}</span>
             {isEdited && (
-              <span className="text-gray-400 ml-1">(edited)</span>
+              <span className="comment-edited">(edited)</span>
             )}
           </div>
         </div>
 
         {/* Comment Content */}
-        <div className="mb-4">
-          <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+        <div className="comment-content">
+          <p className="comment-text">{comment.content}</p>
         </div>
 
-        {/* Comment Actions - Show only if user is the owner */}
+        {/* Comment Files */}
+        {comment.files && comment.files.length > 0 && (
+          <CommentFiles 
+            files={comment.files}
+            currentUserId={currentUserId}
+            onDeleteSuccess={handleFileDeleteSuccess}
+          />
+        )}
+
+        {/* Comment Actions */}
         {isCommentOwner && (
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+          <div className="comment-actions">
             {isEditable && (
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                className="action-btn edit-btn"
               >
                 Edit
               </button>
             )}
             <button
-              onClick={handleDelete}
+              onClick={() => setIsDeleteDialogOpen(true)}
               disabled={isDeleting}
-              className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+              className="action-btn delete-btn"
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </button>
@@ -168,6 +187,18 @@ const CommentCard: React.FC<CommentCardProps> = ({
           onSuccess={handleEditSuccess}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </>
   );
 };

@@ -1,4 +1,3 @@
-// hooks/useFileQueries.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   uploadFile,
@@ -17,7 +16,6 @@ import type {
   IDeleteFileResponse,
 } from '../types/interface/fileInterface';
 
-// Error response type
 interface ApiError {
   response?: {
     data?: {
@@ -32,7 +30,6 @@ interface DownloadResponse {
   filename: string;
 }
 
-// Query Keys
 export const fileKeys = {
   all: ['files'] as const,
   task: (taskId: string) => [...fileKeys.all, 'task', taskId] as const,
@@ -40,9 +37,6 @@ export const fileKeys = {
   comment: (commentId: string) => [...fileKeys.all, 'comment', commentId] as const,
 };
 
-/**
- * Hook to fetch task-level files
- */
 export const useGetTaskFiles = (taskId: string) => {
   return useQuery<IGetFilesResponse, Error>({
     queryKey: fileKeys.task(taskId),
@@ -52,9 +46,6 @@ export const useGetTaskFiles = (taskId: string) => {
   });
 };
 
-/**
- * Hook to fetch all files for a task (including comment files)
- */
 export const useGetAllTaskFiles = (taskId: string) => {
   return useQuery<IGetFilesResponse, Error>({
     queryKey: fileKeys.taskAll(taskId),
@@ -64,9 +55,6 @@ export const useGetAllTaskFiles = (taskId: string) => {
   });
 };
 
-/**
- * Hook to fetch comment files
- */
 export const useGetCommentFiles = (commentId: string) => {
   return useQuery<IGetFilesResponse, Error>({
     queryKey: fileKeys.comment(commentId),
@@ -76,9 +64,6 @@ export const useGetCommentFiles = (commentId: string) => {
   });
 };
 
-/**
- * Hook to upload a single file
- */
 export const useUploadFile = () => {
   const queryClient = useQueryClient();
 
@@ -102,16 +87,13 @@ export const useUploadFile = () => {
   });
 };
 
-/**
- * Hook to upload multiple files
- */
 export const useUploadMultipleFiles = () => {
   const queryClient = useQueryClient();
 
   return useMutation<IUploadFileResponse[], ApiError, IUploadFileDTO[]>({
     mutationFn: uploadMultipleFiles,
     onSuccess: (responses, variables) => {
-      // Invalidate queries for each file's context
+
       variables.forEach(file => {
         if (file.taskId) {
           queryClient.invalidateQueries({ queryKey: fileKeys.task(file.taskId) });
@@ -130,16 +112,12 @@ export const useUploadMultipleFiles = () => {
   });
 };
 
-/**
- * Hook to delete a file
- */
 export const useDeleteFile = () => {
   const queryClient = useQueryClient();
 
   return useMutation<IDeleteFileResponse, ApiError, string>({
     mutationFn: deleteFile,
     onSuccess: (response) => {
-      // Invalidate all file queries
       queryClient.invalidateQueries({ queryKey: fileKeys.all });
       toast.success(response.message || 'File deleted successfully');
     },
@@ -149,11 +127,6 @@ export const useDeleteFile = () => {
     },
   });
 };
-
-/**
- * Hook to download a file
- */
-
 
 export const useDownloadFile = () => {
   return useMutation<DownloadResponse, ApiError, string>({

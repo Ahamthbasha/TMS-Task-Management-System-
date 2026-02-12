@@ -1,8 +1,8 @@
-// components/tasks/BulkTaskModal.tsx
-
 import React, { useState } from 'react';
 import { useBulkCreateTasks } from '../../hooks/useTaskQueries';
 import { TaskStatus, TaskPriority, type ICreateTaskDTO, type TaskStatusType, type TaskPriorityType } from '../../types/interface/taskInterface';
+import UserSearchInput from '../UserSearchInput';
+import './css/BulkTaskModal.css';
 
 interface BulkTaskModalProps {
   onClose: () => void;
@@ -72,76 +72,68 @@ const BulkTaskModal: React.FC<BulkTaskModalProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="bulk-modal-overlay">
+      <div className="bulk-modal-container">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="bulk-modal-header">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Bulk Create Tasks</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="bulk-modal-title">Bulk Create Tasks</h2>
+            <p className="bulk-modal-subtitle">
               Create up to 100 tasks at once ({tasks.length}/100)
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
-          >
+          <button onClick={onClose} className="bulk-modal-close">
             ×
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4 mb-6">
+        <form onSubmit={handleSubmit} className="bulk-modal-form">
+          <div className="bulk-tasks-list">
             {tasks.map((task, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-4 bg-gray-50"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-700">
-                    Task {index + 1}
-                  </h3>
+              <div key={index} className="bulk-task-card">
+                <div className="bulk-task-header">
+                  <h3 className="bulk-task-title">Task {index + 1}</h3>
                   {tasks.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeTask(index)}
-                      className="text-red-600 hover:text-red-700 text-sm"
+                      className="bulk-task-remove"
                     >
                       Remove
                     </button>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bulk-task-grid">
                   {/* Title */}
-                  <div className="md:col-span-2">
+                  <div className="bulk-task-field-full">
                     <input
                       type="text"
                       value={task.title}
                       onChange={(e) => updateTask(index, 'title', e.target.value)}
                       placeholder="Task title (required, min 3 chars)"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bulk-task-input"
                     />
                   </div>
 
                   {/* Description */}
-                  <div className="md:col-span-2">
+                  <div className="bulk-task-field-full">
                     <textarea
                       value={task.description || ''}
                       onChange={(e) => updateTask(index, 'description', e.target.value)}
                       placeholder="Description (optional)"
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bulk-task-textarea"
                     />
                   </div>
 
                   {/* Status */}
-                  <div>
+                  <div className="bulk-task-field">
                     <select
                       value={task.status}
                       onChange={(e) => updateTask(index, 'status', e.target.value as TaskStatusType)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bulk-task-select"
                     >
                       {Object.values(TaskStatus).map((status) => (
                         <option key={status} value={status}>
@@ -152,11 +144,11 @@ const BulkTaskModal: React.FC<BulkTaskModalProps> = ({ onClose }) => {
                   </div>
 
                   {/* Priority */}
-                  <div>
+                  <div className="bulk-task-field">
                     <select
                       value={task.priority}
                       onChange={(e) => updateTask(index, 'priority', e.target.value as TaskPriorityType)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bulk-task-select"
                     >
                       {Object.values(TaskPriority).map((priority) => (
                         <option key={priority} value={priority}>
@@ -167,7 +159,7 @@ const BulkTaskModal: React.FC<BulkTaskModalProps> = ({ onClose }) => {
                   </div>
 
                   {/* Due Date */}
-                  <div>
+                  <div className="bulk-task-field">
                     <input
                       type="date"
                       value={
@@ -177,12 +169,12 @@ const BulkTaskModal: React.FC<BulkTaskModalProps> = ({ onClose }) => {
                       }
                       onChange={(e) => updateTask(index, 'dueDate', e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bulk-task-input"
                     />
                   </div>
 
                   {/* Tags */}
-                  <div>
+                  <div className="bulk-task-field">
                     <input
                       type="text"
                       value={task.tags?.join(', ') || ''}
@@ -195,7 +187,19 @@ const BulkTaskModal: React.FC<BulkTaskModalProps> = ({ onClose }) => {
                         updateTask(index, 'tags', tags);
                       }}
                       placeholder="Tags (comma-separated)"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bulk-task-input"
+                    />
+                  </div>
+
+                  {/* Assigned To */}
+                  <div className="bulk-task-field-full">
+                    <label className="bulk-task-label">
+                      Assign To
+                    </label>
+                    <UserSearchInput
+                      value={task.assignedTo || ''}
+                      onChange={(userId) => updateTask(index, 'assignedTo', userId)}
+                      placeholder="Search and select a user..."
                     />
                   </div>
                 </div>
@@ -208,25 +212,21 @@ const BulkTaskModal: React.FC<BulkTaskModalProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={addTask}
-              className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors mb-6"
+              className="bulk-add-button"
             >
               + Add Another Task
             </button>
           )}
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
+          <div className="bulk-modal-actions">
+            <button type="button" onClick={onClose} className="btn btn-cancel">
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-submit"
             >
               {isPending ? 'Creating...' : `Create ${tasks.filter(t => t.title.trim().length >= 3).length} Tasks`}
             </button>

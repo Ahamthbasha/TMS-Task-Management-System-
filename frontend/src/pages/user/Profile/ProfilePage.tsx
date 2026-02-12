@@ -1,9 +1,8 @@
-// pages/user/Profile/ProfilePage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '@/api/authAction/userAuth';
 import { toast } from 'react-toastify';
+import './ProfilePage.css';
 
 interface UserData {
   id: string;
@@ -42,14 +41,12 @@ const ProfilePage: React.FC = () => {
       
       let errorMessage = 'Failed to load profile data';
       
-      // Type-safe error handling
       if (error && typeof error === 'object' && 'response' in error) {
         const apiError = error as ApiError;
         if (apiError.response?.data?.message) {
           errorMessage = apiError.response.data.message;
         }
         
-        // Redirect to login if unauthorized
         if (apiError.response?.status === 401) {
           navigate('/login');
         }
@@ -76,10 +73,10 @@ const ProfilePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+      <div className="profile-loading-container">
+        <div className="profile-loading-content">
+          <div className="profile-spinner"></div>
+          <p className="profile-loading-text">Loading profile...</p>
         </div>
       </div>
     );
@@ -87,13 +84,13 @@ const ProfilePage: React.FC = () => {
 
   if (!userData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-red-600 text-center">
-          <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
-          <p className="mb-4">Unable to load user profile data</p>
+      <div className="profile-error-container">
+        <div className="profile-error-content">
+          <h2 className="profile-error-title">Profile Not Found</h2>
+          <p className="profile-error-message">Unable to load user profile data</p>
           <button
             onClick={() => navigate('/login')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="profile-error-button"
           >
             Go to Login
           </button>
@@ -103,42 +100,38 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="profile-container">
+      <div className="profile-wrapper">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
-          <p className="text-gray-600 mt-2">
+        <div className="profile-header">
+          <h1 className="profile-title">User Profile</h1>
+          <p className="profile-subtitle">
             View and manage your account information
           </p>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="profile-content">
           {/* Left Column - Profile Card */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="profile-main">
+            <div className="profile-card">
               {/* Profile Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white">
-                <div className="flex items-center gap-6">
+              <div className="profile-card-header">
+                <div className="profile-card-header-content">
                   {/* Avatar */}
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-2xl font-bold border-2 border-white/30">
+                  <div className="profile-avatar">
                     {getInitials(userData.name)}
                   </div>
                   
                   {/* User Info */}
-                  <div>
-                    <h2 className="text-2xl font-bold">{userData.name}</h2>
-                    <p className="text-blue-100">{userData.email}</p>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        userData.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                  <div className="profile-user-info">
+                    <h2 className="profile-user-name">{userData.name}</h2>
+                    <p className="profile-user-email">{userData.email}</p>
+                    <div className="profile-badges">
+                      <span className={`profile-badge ${userData.isActive ? 'badge-active' : 'badge-inactive'}`}>
                         {userData.isActive ? 'Active' : 'Inactive'}
                       </span>
-                      <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                      <span className="profile-badge badge-role">
                         {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
                       </span>
                     </div>
@@ -147,42 +140,40 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Profile Details */}
-              <div className="p-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+              <div className="profile-details">
+                <h3 className="profile-details-title">Account Information</h3>
                 
-                <div className="space-y-6">
+                <div className="profile-details-grid">
                   {/* Personal Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
+                  <div className="profile-info-grid">
+                    <div className="profile-info-item">
+                      <label className="profile-info-label">
                         Full Name
                       </label>
-                      <p className="text-gray-900 font-medium">{userData.name}</p>
+                      <p className="profile-info-value">{userData.name}</p>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
+                    <div className="profile-info-item">
+                      <label className="profile-info-label">
                         Email Address
                       </label>
-                      <p className="text-gray-900 font-medium">{userData.email}</p>
+                      <p className="profile-info-value">{userData.email}</p>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
+                    <div className="profile-info-item">
+                      <label className="profile-info-label">
                         Account Role
                       </label>
-                      <p className="text-gray-900 font-medium">
+                      <p className="profile-info-value">
                         {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
                       </p>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
+                    <div className="profile-info-item">
+                      <label className="profile-info-label">
                         Account Status
                       </label>
-                      <p className={`font-medium ${
-                        userData.isActive ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <p className={`profile-info-value ${userData.isActive ? 'status-active' : 'status-inactive'}`}>
                         {userData.isActive ? 'Active' : 'Inactive'}
                       </p>
                     </div>

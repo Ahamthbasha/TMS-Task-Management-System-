@@ -1,4 +1,3 @@
-// pages/user/Tasks/TaskList.tsx
 
 import React, { useState } from 'react';
 import { useGetTasks, useDeleteTask } from '../../../hooks/useTaskQueries';
@@ -7,7 +6,9 @@ import TaskCard from '../../../components/taskComponent/TaskCard';
 import TaskFilters from '../../../components/taskComponent/TaskFilters';
 import TaskModal from '../../../components/taskComponent/TaskModal';
 import BulkTaskModal from '../../../components/taskComponent/BulkTaskModal';
+import ConfirmationDialog from '../../../components/ConfirmationDialog'; 
 import { useNavigate } from 'react-router-dom';
+import './css/TaskList.css';
 
 interface ErrorResponse {
   response?: {
@@ -30,6 +31,9 @@ const TaskList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [taskTitleToDelete, setTaskTitleToDelete] = useState<string>('');
 
   const { data, isLoading, error } = useGetTasks(filters);
   const { mutate: deleteTask } = useDeleteTask();
@@ -38,19 +42,30 @@ const TaskList: React.FC = () => {
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
-      page: 1, // Reset to first page when filters change
+      page: 1,
     }));
   };
 
   const handlePageChange = (newPage: number) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
-    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (taskId: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTask(taskId);
+  const handleDeleteClick = (taskId: string, taskTitle: string) => {
+    setTaskToDelete(taskId);
+    setTaskTitleToDelete(taskTitle);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (taskToDelete) {
+      deleteTask(taskToDelete, {
+        onSuccess: () => {
+          setDeleteDialogOpen(false);
+          setTaskToDelete(null);
+          setTaskTitleToDelete('');
+        },
+      });
     }
   };
 
@@ -75,13 +90,13 @@ const TaskList: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600 text-center">
-          <h2 className="text-2xl font-bold mb-2">Error Loading Tasks</h2>
-          <p>{getErrorMessage(error)}</p>
+      <div className="tasklist-error-container">
+        <div className="tasklist-error-content">
+          <h2 className="tasklist-error-title">Error Loading Tasks</h2>
+          <p className="tasklist-error-message">{getErrorMessage(error)}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="tasklist-error-button"
           >
             Retry
           </button>
@@ -91,21 +106,21 @@ const TaskList: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="tasklist-container">
+      <div className="tasklist-wrapper">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Task Management</h1>
-          <p className="text-gray-600 mb-4">
+        <div className="tasklist-header">
+          <h1 className="tasklist-title">Task Management</h1>
+          <p className="tasklist-subtitle">
             Manage your tasks efficiently with advanced filtering and organization
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="tasklist-actions">
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="tasklist-btn tasklist-btn-primary"
             >
               <svg
-                className="w-5 h-5"
+                className="tasklist-btn-icon"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -121,10 +136,10 @@ const TaskList: React.FC = () => {
             </button>
             <button
               onClick={() => setIsBulkModalOpen(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              className="tasklist-btn tasklist-btn-success"
             >
               <svg
-                className="w-5 h-5"
+                className="tasklist-btn-icon"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -146,29 +161,27 @@ const TaskList: React.FC = () => {
 
         {/* Task List */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading tasks...</p>
-            </div>
+          <div className="tasklist-loading">
+            <div className="tasklist-spinner"></div>
+            <p className="tasklist-loading-text">Loading tasks...</p>
           </div>
         ) : data?.data?.tasks && data.data.tasks.length > 0 ? (
           <>
             {/* Results Summary */}
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="tasklist-summary">
               Showing {(data.data.page - 1) * (filters.limit || 10) + 1} to{' '}
               {Math.min(data.data.page * (filters.limit || 10), data.data.total)} of{' '}
               {data.data.total} tasks
             </div>
 
             {/* Task Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="tasklist-grid">
               {data.data.tasks.map((task) => (
                 <TaskCard
                   key={task._id}
                   task={task}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={() => handleDeleteClick(task._id, task.title)}
                   onView={handleViewDetails}
                 />
               ))}
@@ -176,14 +189,14 @@ const TaskList: React.FC = () => {
 
             {/* Pagination */}
             {data.data.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-8">
+              <div className="tasklist-pagination">
                 <button
                   onClick={() => handlePageChange(data.data.page - 1)}
                   disabled={!data.data.hasPrevPage}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                  className="pagination-btn pagination-prev"
                 >
                   <svg
-                    className="w-5 h-5"
+                    className="pagination-icon"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -197,7 +210,7 @@ const TaskList: React.FC = () => {
                   </svg>
                 </button>
 
-                <div className="flex items-center gap-2">
+                <div className="pagination-pages">
                   {Array.from({ length: data.data.totalPages }, (_, i) => i + 1)
                     .filter((page) => {
                       const current = data.data.page;
@@ -211,13 +224,11 @@ const TaskList: React.FC = () => {
                       if (index > 0 && page - array[index - 1] > 1) {
                         return (
                           <React.Fragment key={`ellipsis-${page}`}>
-                            <span className="px-2 text-gray-400">...</span>
+                            <span className="pagination-ellipsis">...</span>
                             <button
                               onClick={() => handlePageChange(page)}
-                              className={`px-4 py-2 border rounded-lg transition-colors ${
-                                page === data.data.page
-                                  ? 'bg-blue-600 text-white border-blue-600'
-                                  : 'border-gray-300 hover:bg-gray-50'
+                              className={`pagination-number ${
+                                page === data.data.page ? 'active' : ''
                               }`}
                             >
                               {page}
@@ -229,10 +240,8 @@ const TaskList: React.FC = () => {
                         <button
                           key={page}
                           onClick={() => handlePageChange(page)}
-                          className={`px-4 py-2 border rounded-lg transition-colors ${
-                            page === data.data.page
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'border-gray-300 hover:bg-gray-50'
+                          className={`pagination-number ${
+                            page === data.data.page ? 'active' : ''
                           }`}
                         >
                           {page}
@@ -244,10 +253,10 @@ const TaskList: React.FC = () => {
                 <button
                   onClick={() => handlePageChange(data.data.page + 1)}
                   disabled={!data.data.hasNextPage}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                  className="pagination-btn pagination-next"
                 >
                   <svg
-                    className="w-5 h-5"
+                    className="pagination-icon"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -264,9 +273,9 @@ const TaskList: React.FC = () => {
             )}
           </>
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
+          <div className="tasklist-empty">
             <svg
-              className="w-16 h-16 mx-auto text-gray-400 mb-4"
+              className="empty-icon"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -278,15 +287,15 @@ const TaskList: React.FC = () => {
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
               />
             </svg>
-            <p className="text-gray-500 text-lg mb-4">No tasks found</p>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="empty-title">No tasks found</p>
+            <p className="empty-message">
               {filters.search || filters.status || filters.priority
                 ? 'Try adjusting your filters or create a new task'
                 : 'Get started by creating your first task'}
             </p>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="empty-button"
             >
               Create Your First Task
             </button>
@@ -300,6 +309,22 @@ const TaskList: React.FC = () => {
       )}
 
       {isBulkModalOpen && <BulkTaskModal onClose={() => setIsBulkModalOpen(false)} />}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setTaskToDelete(null);
+          setTaskTitleToDelete('');
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Task"
+        message={`Are you sure you want to delete "${taskTitleToDelete}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

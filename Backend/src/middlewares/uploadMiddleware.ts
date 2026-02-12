@@ -1,6 +1,5 @@
 // src/middlewares/uploadMiddleware.ts - Updated with type assertion
 import multer from 'multer';
-import path from 'path';
 import fs from 'fs';
 import { Request } from 'express';
 
