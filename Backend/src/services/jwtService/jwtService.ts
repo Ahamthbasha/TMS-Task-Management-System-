@@ -1,5 +1,5 @@
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
-import { IJwtService } from "./IJwtService";
+import { IJwtService, IRegistrationPayload } from "./IJwtService";
 
 export interface IJwtPayload {
   userId: string;
@@ -17,12 +17,16 @@ export class JwtService implements IJwtService {
   private refreshSecret: Secret;
   private accessExpiry: string;
   private refreshExpiry: string;
+  private registrationSecret: Secret;
+  private registrationExpiry: string;
 
   constructor() {
     this.accessSecret = this.getRequiredEnv("JWT_ACCESS_SECRET");
     this.refreshSecret = this.getRequiredEnv("JWT_REFRESH_SECRET");
     this.accessExpiry = process.env.JWT_ACCESS_EXPIRY || "15m"; // fallback
     this.refreshExpiry = process.env.JWT_REFRESH_EXPIRY || "7d"; // fallback
+    this.registrationSecret = this.getRequiredEnv("JWT_REGISTRATION_SECRET") || this.accessSecret;
+    this.registrationExpiry = process.env.JWT_REGISTRATION_EXPIRY || "10m"; // 10 minutes for registration
   }
 
   private getRequiredEnv(key: string): string {
@@ -88,6 +92,32 @@ export class JwtService implements IJwtService {
       return decoded as IJwtPayload;
     } catch (error) {
       throw new Error("Invalid or expired refresh token");
+    }
+  }
+
+   generateRegistrationToken(payload: IRegistrationPayload): string {
+    return jwt.sign(payload, this.registrationSecret, {
+      expiresIn: this.registrationExpiry,
+    } as SignOptions);
+  }
+
+  verifyRegistrationToken(token: string): IRegistrationPayload {
+    try {
+      const decoded = jwt.verify(token, this.registrationSecret);
+      
+      if (
+        typeof decoded === "string" ||
+        !decoded.name ||
+        !decoded.email ||
+        !decoded.password ||
+        !decoded.timestamp
+      ) {
+        throw new Error("Invalid registration token payload");
+      }
+      
+      return decoded as IRegistrationPayload;
+    } catch (error) {
+      throw new Error("Registration session expired. Please register again.");
     }
   }
 }

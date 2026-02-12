@@ -5,6 +5,8 @@ const userRouterEndPoints = {
     userProfile : '/api/user/profile',
     userSearch : '/api/user/users/search',
     userAll:'/api/user/users/all',
+    userVerifyOTP: '/api/user/verifyOtp',
+    userResendOTP: '/api/user/resendOtp',
 
     // Task endpoints - Updated to plural
     userCreateTask : '/api/user/tasks',              

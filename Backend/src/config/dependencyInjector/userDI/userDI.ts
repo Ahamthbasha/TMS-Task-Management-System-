@@ -46,12 +46,51 @@ import { AnalyticsController } from "../../../controllers/userController/analyti
 import { IUserService } from "../../../services/userService/userService/IUserService";
 import { UserService } from "../../../services/userService/userService/userService";
 
+import { IOTPRepository } from "../../../repositories/userRepo/otpRepo/IOtpRepo";
+import { OTPRepository } from "../../../repositories/userRepo/otpRepo/otpRepo";
+import { IOTPService } from "../../../services/otpService/IOtpService";
+import { OTPService } from "../../../services/otpService/otpService";
+
+import { IEmailService } from "../../../services/emailService/IEmailService";
+import { EmailService } from "../../../services/emailService/emailService";
+import { IEmailConfig } from "../../../services/emailService/IEmailService";
+
+const hasGmailConfig = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD;
+
+let emailService: IEmailService;
+
+if (hasGmailConfig) {
+  // Production mode - Use real Gmail SMTP
+  emailService = new EmailService({
+    user: process.env.GMAIL_USER!,
+    pass: process.env.GMAIL_APP_PASSWORD!,
+    fromName: process.env.GMAIL_FROM_NAME || 'Task Management System'
+  });
+  console.log('📧 Using Gmail SMTP for emails');
+} else {
+  // Development mode - Fallback to console logging
+  console.warn('⚠️ Gmail credentials not found. Using console logging for emails.');
+  emailService = {
+    sendOTPEmail: async (email: string, otp: string) => {
+      console.log('=================================');
+      console.log(`🔐 [DEV MODE] OTP for ${email}: ${otp}`);
+      console.log('=================================');
+    },
+    sendWelcomeEmail: async (email: string, name: string) => {
+      console.log(`📧 [DEV MODE] Welcome email sent to ${name} (${email})`);
+    }
+  } as IEmailService;
+}
+
+
+const otpRepo : IOTPRepository = new OTPRepository()
+const otpService : IOTPService = new OTPService(otpRepo,emailService)
 
 const hashService : IHashingService = new HashingService()
 const jwtService : IJwtService = new JwtService()
 
 const userRepo : IUserRepository = new UserRepository()
-const userService : IAuthService = new AuthService(userRepo,hashService,jwtService)
+const userService : IAuthService = new AuthService(userRepo,hashService,jwtService,otpService,emailService)
 const userAssignService : IUserService = new UserService(userRepo)
 const userController : IAuthController = new AuthController(userService,userAssignService)
 

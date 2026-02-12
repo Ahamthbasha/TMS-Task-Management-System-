@@ -12,6 +12,11 @@ export interface UserSearchResponse {
   success: boolean;
   data: UserSearchResult[];
 }
+
+export interface VerifyOTPData{
+  email : string;
+  otp:string;
+}
 export const login = async (credentials: LoginCredentials) => {
   const response = await API.post(userRouterEndPoints.userLogin, credentials);
   return response.data;
@@ -45,5 +50,15 @@ export const searchUsers = async (query: string): Promise<UserSearchResponse> =>
 
 export const getAllUsers = async (): Promise<UserSearchResponse> => {
   const response = await API.get(userRouterEndPoints.userAll);
+  return response.data;
+};
+
+export const verifyOTP = async (data: VerifyOTPData) => {
+  const response = await API.post(userRouterEndPoints.userVerifyOTP, data);
+  return response.data;
+};
+
+export const resendOTP = async (data:{email: string}) => {
+  const response = await API.post(userRouterEndPoints.userResendOTP, data);
   return response.data;
 };

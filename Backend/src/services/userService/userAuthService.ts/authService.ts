@@ -1,59 +1,295 @@
-import { IUserRepository } from '../../../repositories/userRepo/userAuthRepo/IuserAuthRepo';  
+// import { IUserRepository } from '../../../repositories/userRepo/userAuthRepo/IuserAuthRepo';
+// import { IHashingService } from '../../hashService/IHashService';
+// import { IJwtService,  } from '../../jwtService/IJwtService';
+// import { IOTPService } from '../../otpService/IOtpService'; 
+// import { IEmailService } from '../../emailService/IEmailService';
+// import { IUser } from '../../../models/userModel';
+// import { 
+//   IAuthService, 
+//   IRegisterDTO, 
+//   ILoginDTO, 
+//   IVerifyOTPDTO, 
+//   IAuthResponse 
+// } from './IAuthService';
+// import { AppError } from '../../../utils/errorUtil/appError';
+
+// export class AuthService implements IAuthService {
+//   constructor(
+//     private userRepository: IUserRepository,
+//     private hashingService: IHashingService,
+//     private jwtService: IJwtService,
+//     private otpService: IOTPService,
+//     private emailService: IEmailService
+//   ) {}
+
+//   async register(data: IRegisterDTO): Promise<void> {
+//     // Check if user already exists
+//     const existingUser = await this.userRepository.findByEmail(data.email);
+//     if (existingUser) {
+//       throw new AppError('User with this email already exists', 409);
+//     }
+
+//     // Hash password
+//     const hashedPassword = await this.hashingService.hash(data.password);
+
+//     // Create user as INACTIVE (will be activated after OTP verification)
+//     await this.userRepository.create({
+//       name: data.name,
+//       email: data.email,
+//       password: hashedPassword,
+//       isActive: false, // Important: user is inactive until OTP verified
+//     } as IUser);
+
+//     // Generate and send OTP
+//     await this.otpService.generateAndSendOTP(data.email);
+//   }
+
+//   async verifyOTP(data: IVerifyOTPDTO): Promise<void> {
+//     // Verify the OTP
+//     const isValid = await this.otpService.verifyOTP(data.email, data.otp);
+    
+//     if (!isValid) {
+//       throw new AppError('Invalid OTP', 400);
+//     }
+
+//     // Find the user
+//     const user = await this.userRepository.findOne({ 
+//       email: data.email,
+//       isActive: false 
+//     });
+
+//     if (!user) {
+//       throw new AppError('User not found or already verified', 404);
+//     }
+
+//     // Activate the user account
+//     await this.userRepository.update(user._id.toString(), { isActive: true });
+
+//     // Send welcome email (non-blocking)
+//     this.emailService.sendWelcomeEmail(data.email, user.name).catch(err => {
+//       console.error('Failed to send welcome email:', err);
+//     });
+//   }
+
+//   async resendOTP(email: string): Promise<void> {
+//     // Check if user exists and is not yet verified
+//     const user = await this.userRepository.findOne({ email, isActive: false });
+    
+//     if (!user) {
+//       throw new AppError('User not found or already verified', 404);
+//     }
+
+//     // Resend OTP
+//     await this.otpService.resendOTP(email);
+//   }
+
+//   async login(data: ILoginDTO): Promise<IAuthResponse> {
+//     // Find user with password
+//     const user = await this.userRepository.findByEmailWithPassword(data.email);
+//     if (!user) {
+//       throw new AppError('Invalid email or password', 401);
+//     }
+
+//     // Check if user is active (OTP verified)
+//     if (!user.isActive) {
+//       throw new AppError('Please verify your email first. Check your inbox for OTP.', 403);
+//     }
+
+//     // Verify password
+//     const isPasswordValid = await this.hashingService.compare(
+//       data.password,
+//       user.password
+//     );
+//     if (!isPasswordValid) {
+//       throw new AppError('Invalid email or password', 401);
+//     }
+
+//     // Generate tokens
+//     const tokens = this.jwtService.generateTokenPair({
+//       userId: user._id.toString(),
+//       email: user.email,
+//       role: user.role,
+//     });
+
+//     return {
+//       user: {
+//         id: user._id.toString(),
+//         name: user.name,
+//         email: user.email,
+//         role: user.role,
+//         isActive: user.isActive,
+//       },
+//       tokens,
+//     };
+//   }
+
+//   async getCurrentUser(userId: string): Promise<IUser> {
+//     const user = await this.userRepository.findById(userId);
+//     if (!user) {
+//       throw new AppError('User not found', 404);
+//     }
+//     return user;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { IUserRepository } from '../../../repositories/userRepo/userAuthRepo/IuserAuthRepo';
 import { IHashingService } from '../../hashService/IHashService';
-import { IJwtService, ITokenPair } from '../../jwtService/IJwtService';
+import { IJwtService, IRegistrationPayload } from '../../jwtService/IJwtService';
+import { IOTPService } from '../../otpService/IOtpService';
+import { IEmailService } from '../../emailService/IEmailService';
 import { IUser } from '../../../models/userModel';
-import { IAuthService } from './IAuthService';
+import { 
+  IAuthService, 
+  IRegisterDTO, 
+  ILoginDTO, 
+  IVerifyOTPDTO, 
+  IResendOTPDTO,
+  IAuthResponse,
+  IVerifyOTPResponse
+} from './IAuthService';
 import { AppError } from '../../../utils/errorUtil/appError';
-
-export interface IRegisterDTO {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface ILoginDTO {
-  email: string;
-  password: string;
-}
-
-export interface IAuthResponse {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    isActive: boolean;
-  };
-  tokens: ITokenPair;
-}
 
 export class AuthService implements IAuthService {
   constructor(
     private userRepository: IUserRepository,
     private hashingService: IHashingService,
-    private jwtService: IJwtService
+    private jwtService: IJwtService,
+    private otpService: IOTPService,
+    private emailService: IEmailService
   ) {}
 
-  async register(data: IRegisterDTO): Promise<void> {
-    // Check if user already exists
+  /**
+   * STEP 1: Initiate Registration
+   * - Check if user already exists
+   * - Hash password
+   * - Create registration token
+   * - Send OTP email
+   * - NO DATABASE SAVE
+   */
+  async initiateRegistration(data: IRegisterDTO): Promise<{ 
+    registrationToken: string; 
+    expiresIn: number;
+    email: string;
+  }> {
+    // Check if user already exists in database
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new AppError('User with this email already exists', 409);
     }
 
-    // Hash password
+    // Hash password immediately
     const hashedPassword = await this.hashingService.hash(data.password);
 
-    // Create user - NO TOKEN GENERATION
-    await this.userRepository.create({
+    // Create registration payload
+    const registrationPayload: IRegistrationPayload = {
       name: data.name,
       email: data.email,
       password: hashedPassword,
-    } as IUser);
+      timestamp: Date.now()
+    };
 
-    // Return nothing - just successful registration
+    // Generate registration token (valid for 10 minutes)
+    const registrationToken = this.jwtService.generateRegistrationToken(registrationPayload);
+
+    // Generate and send OTP
+    const { expiresIn } = await this.otpService.generateAndSendOTP(data.email);
+
+    return {
+      registrationToken,
+      expiresIn,
+      email: data.email
+    };
   }
 
+  /**
+   * STEP 2: Verify OTP and Complete Registration
+   * - Verify OTP
+   * - Decode registration token
+   * - Save user to database
+   * - Send welcome email
+   */
+  async verifyOTPAndCompleteRegistration(
+    data: IVerifyOTPDTO, 
+    registrationToken: string
+  ): Promise<IVerifyOTPResponse> {
+    // 1. Verify the OTP first
+    await this.otpService.verifyOTP(data.email, data.otp);
+
+    // 2. Decode and verify registration token
+    let registrationData: IRegistrationPayload;
+    try {
+      registrationData = this.jwtService.verifyRegistrationToken(registrationToken);
+    } catch (error) {
+      throw new AppError('Registration session expired. Please register again.', 400);
+    }
+
+    // 3. Verify email matches (security check)
+    if (registrationData.email !== data.email) {
+      throw new AppError('Email mismatch. Please register again.', 400);
+    }
+
+    // 4. Double-check user doesn't already exist (race condition)
+    const existingUser = await this.userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new AppError('User with this email already exists', 409);
+    }
+
+    // 5. Create user in database (ACTIVE now)
+    const user = await this.userRepository.create({
+      name: registrationData.name,
+      email: registrationData.email,
+      password: registrationData.password, // Already hashed
+      isActive: true,
+      role: 'user'
+    } as IUser);
+
+    // 6. Send welcome email (non-blocking)
+    this.emailService.sendWelcomeEmail(data.email, registrationData.name).catch(err => {
+      console.error('Failed to send welcome email:', err);
+    });
+
+    return {
+      success: true,
+      message: 'Email verified successfully. Your account has been created.'
+    };
+  }
+
+  /**
+   * Resend OTP
+   * - Check if user exists in database (if not, they're in registration flow)
+   * - Resend OTP
+   */
+  async resendOTP(data: IResendOTPDTO): Promise<{ expiresIn: number }> {
+    // Check if user already exists and is active
+    const existingUser = await this.userRepository.findByEmail(data.email);
+    if (existingUser && existingUser.isActive) {
+      throw new AppError('This email is already registered and verified.', 409);
+    }
+
+    // Resend OTP
+    return this.otpService.resendOTP(data.email);
+  }
+
+  /**
+   * Login
+   * - Only for fully registered and active users
+   */
   async login(data: ILoginDTO): Promise<IAuthResponse> {
     // Find user with password
     const user = await this.userRepository.findByEmailWithPassword(data.email);
@@ -61,9 +297,9 @@ export class AuthService implements IAuthService {
       throw new AppError('Invalid email or password', 401);
     }
 
-    // Check if user is active
+    // Check if user is active (must be fully registered)
     if (!user.isActive) {
-      throw new AppError('Account is deactivated', 403);
+      throw new AppError('Please verify your email first. Check your inbox for OTP.', 403);
     }
 
     // Verify password
@@ -92,24 +328,6 @@ export class AuthService implements IAuthService {
       },
       tokens,
     };
-  }
-
-  async refreshToken(refreshToken: string): Promise<ITokenPair> {
-    // Verify refresh token
-    const payload = this.jwtService.verifyRefreshToken(refreshToken);
-
-    // Verify user still exists and is active
-    const user = await this.userRepository.findById(payload.userId);
-    if (!user || !user.isActive) {
-      throw new AppError('User not found or inactive', 401);
-    }
-
-    // Generate new token pair
-    return this.jwtService.generateTokenPair({
-      userId: user._id.toString(),
-      email: user.email,
-      role: user.role,
-    });
   }
 
   async getCurrentUser(userId: string): Promise<IUser> {

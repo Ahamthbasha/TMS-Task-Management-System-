@@ -9,6 +9,7 @@ import TaskDetail from "../pages/user/Task/TaskDetail";
 import ProfilePage from "../pages/user/Profile/ProfilePage";
 import SidebarWrapper from "../layouts/userLayout/SidebarWrapper";
 import AnalyticsDashboard from "@/pages/user/Analytics/AnalyticsDashboard";
+import OTPVerification from "@/pages/user/Auth/OTPVerification";
 
 const UserRouter = () => {
   return (
@@ -32,6 +33,7 @@ const UserRouter = () => {
             </UserSessionRoute>
           }
         />
+        <Route path="/verify-otp" element={<OTPVerification/>}/>
       </Route>
       {/* sidebar layout */}
       <Route element={<SidebarWrapper />}>

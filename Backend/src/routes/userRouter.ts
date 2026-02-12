@@ -14,8 +14,9 @@ router.post('/register', registerValidation, validateRequest, userController.reg
 router.post('/login', loginValidation, validateRequest, userController.login);
 router.post('/logout', authMiddleware.authenticate, userController.logout);
 router.get('/profile', authMiddleware.authenticate, userController.getCurrentUser);
+router.post('/verifyOtp', userController.verifyOTP);
+router.post('/resendOtp', userController.resendOTP);
 
-// 
 
 router.get('/users/search', 
   authMiddleware.authenticate, 
